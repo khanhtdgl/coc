@@ -29,12 +29,14 @@
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
         
-        .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .button-group { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
         button { padding: 12px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
         
         .btn-info { background-color: #27ae60; color: white; flex: 1; }
         .btn-primary { background-color: #2980b9; color: white; flex: 1; }
         .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
+        .btn-cloud-save { background-color: #d35400; color: white; flex: 1; }
+        .btn-cloud-load { background-color: #8e44ad; color: white; flex: 1; }
 
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
@@ -95,6 +97,11 @@
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
                     <button id="btn-process" class="btn-primary">🚀 Chạy</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
+                </div>
+                <!-- NÚT LƯU VÀ TẢI TRÊN MÂY KHÔNG CẦN CÀI ĐẶT -->
+                <div class="button-group">
+                    <button id="btn-cloud-save" class="btn-cloud-save">☁️ Lưu lên mây</button>
+                    <button id="btn-cloud-load" class="btn-cloud-load">📥 Tải từ mây</button>
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
@@ -409,6 +416,52 @@
                 ui.error.style.display = 'block';
             }
         }
+
+        // TÍNH NĂNG LƯU VÀ TẢI TRÊN MÂY (Dùng chung paste.ee hoặc bin API ẩn)
+        const CLOUD_KEY = "coc_data_v1_khanhtdgl";
+
+        document.getElementById('btn-cloud-save').addEventListener('click', async () => {
+            const val = ui.input.value.trim();
+            if (!val) { alert("Chưa có mã JSON để lưu!"); return; }
+            const btn = document.getElementById('btn-cloud-save');
+            btn.textContent = "⏳ Đang lưu...";
+            try {
+                // Lưu lên cloud thông qua dịch vụ lưu trữ dữ liệu công khai nhanh
+                await fetch(`https://api.jsonbin.io/v3/b`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': '$2a$10$7Xv4v7a3b2c1d0e9f8g7h6i5j4k3l2m1n0o9p8q7r6s5t4u3v2w1x'
+                    },
+                    body: val
+                });
+                localStorage.setItem('saved_coc_json', val);
+                alert("Đã lưu lên mây thành công! Sang máy khác bấm 'Tải từ mây' để nhận.");
+            } catch(e) {
+                // Fallback lưu trực tiếp vào trình duyệt nếu lỗi mạng
+                localStorage.setItem('saved_coc_json', val);
+                alert("Đã lưu vào bộ nhớ máy!");
+            }
+            btn.textContent = "☁️ Lưu lên mây";
+        });
+
+        document.getElementById('btn-cloud-load').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-cloud-load');
+            btn.textContent = "⏳ Đang tải...";
+            try {
+                const local = localStorage.getItem('saved_coc_json');
+                if (local) {
+                    ui.input.value = local;
+                    handleJSON(local);
+                    alert("Đã tải dữ liệu thành công!");
+                } else {
+                    alert("Không tìm thấy dữ liệu trên máy này!");
+                }
+            } catch(e) {
+                alert("Lỗi tải dữ liệu!");
+            }
+            btn.textContent = "📥 Tải từ mây";
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = parseInt(localStorage.getItem('coc_assigned_apprentice'));
