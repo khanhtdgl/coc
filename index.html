@@ -39,9 +39,14 @@
 
         .apprentice-row { display: flex; align-items: center; justify-content: space-between; background: #2c2c2e; padding: 10px; border-radius: 8px; border: 1px solid #4a4a4c; gap: 10px; flex-wrap: wrap; }
         .apprentice-row label { font-size: 0.85rem; color: #f39c12; font-weight: bold; }
-        .apprentice-row select, .apprentice-row input { flex: 1; padding: 6px 10px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 180px; }
+        .apprentice-row select { flex: 1; padding: 6px 10px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 180px; }
+        
+        /* Nhóm ô nhập giờ phút giây */
+        .time-inputs { display: flex; gap: 5px; align-items: center; flex: 1; }
+        .time-inputs input { width: 60px; padding: 6px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; text-align: center; outline: none; }
+        .time-inputs span { font-size: 0.85rem; color: #aaa; }
 
-        .btn-action-app { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+        .btn-action-app { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; white-space: nowrap; }
         .btn-action-app:disabled { background: #555; color: #888; cursor: not-allowed; }
 
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
@@ -106,7 +111,7 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
-            <!-- BẢNG THỢ XÂY HỌC VIỆC VÀ CƠ CHẾ KÊU GỌI LÀM VIỆC 1H -->
+            <!-- BẢNG THỢ XÂY HỌC VIỆC VÀ CHỈNH SỬA THỜI GIAN HỌC VIỆC (GIỜ, PHÚT, GIÂY) -->
             <div class="apprentice-card">
                 <div class="apprentice-top">
                     <div class="apprentice-left">
@@ -134,9 +139,13 @@
                 </div>
 
                 <div class="apprentice-row">
-                    <label for="cooldown-input-edit">⏱️ Chỉnh sửa thời gian đếm ngược (giây):</label>
-                    <input type="number" id="cooldown-input-edit" placeholder="Nhập số giây cooldown...">
-                    <button id="btn-set-cooldown" class="btn-action-app" style="background: #2980b9;">Cập nhật thời gian</button>
+                    <label>⏱️ Chỉnh sửa thời gian khả dụng:</label>
+                    <div class="time-inputs">
+                        <input type="number" id="input-hours" placeholder="Giờ" min="0"> <span>h</span>
+                        <input type="number" id="input-mins" placeholder="Phút" min="0" max="59"> <span>m</span>
+                        <input type="number" id="input-secs" placeholder="Giây" min="0" max="59"> <span>s</span>
+                    </div>
+                    <button id="btn-set-cooldown" class="btn-action-app" style="background: #2980b9;">Cập nhật</button>
                 </div>
             </div>
 
@@ -215,7 +224,9 @@
             cooldown: document.getElementById('cooldown-timer'),
             status: document.getElementById('apprentice-status'),
             assignSelect: document.getElementById('apprentice-target-select'),
-            cooldownInputEdit: document.getElementById('cooldown-input-edit'),
+            inputHours: document.getElementById('input-hours'),
+            inputMins: document.getElementById('input-mins'),
+            inputSecs: document.getElementById('input-secs'),
             btnStartWork: document.getElementById('btn-start-work'),
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
@@ -224,7 +235,7 @@
         let countdownInterval = null;
         let assignedBuilderApprenticeId = null;
         let helperCooldownSeconds = 0;
-        let workTimeRemaining = 0; // Đếm ngược thời gian làm việc 1 giờ (3600 giây)
+        let workTimeRemaining = 0; 
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -243,7 +254,6 @@
             }
         }
 
-        // Tốc độ x8 trong 1 giờ làm việc: 1 giờ gốc đẩy nhanh tốc độ x8 thành 8 giờ công việc hoàn thành trong 1 giờ thực tế (giảm được 7 giờ)
         function calculateX8Time(timerSeconds) {
             const hoursReduction = 7 * 3600; 
             return Math.max(0, timerSeconds - hoursReduction);
@@ -266,8 +276,17 @@
                 workTimeRemaining = parseInt(savedWorkTime);
             }
 
-            ui.cooldownInputEdit.value = helperCooldownSeconds;
+            updateTimeInputs(helperCooldownSeconds);
             renderAllSections();
+        }
+
+        function updateTimeInputs(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            ui.inputHours.value = h;
+            ui.inputMins.value = m;
+            ui.inputSecs.value = s;
         }
 
         function renderAllSections() {
@@ -312,7 +331,6 @@
                 }
             }
 
-            // Chỉ áp dụng x8 nếu đang trong thời gian làm việc 1 giờ (workTimeRemaining > 0)
             const isWorking = workTimeRemaining > 0;
 
             buildersData.forEach(item => {
@@ -413,27 +431,25 @@
             }
         }
 
-        // Bấm nút bắt đầu làm việc trong 1 giờ
         ui.btnStartWork.addEventListener('click', () => {
             if (helperCooldownSeconds <= 0 && workTimeRemaining <= 0) {
-                workTimeRemaining = 3600; // 1 giờ thực tế
-                helperCooldownSeconds = 23 * 3600; // Hồi chiêu 23 giờ tiếp theo
+                workTimeRemaining = 3600; 
+                helperCooldownSeconds = 23 * 3600; 
                 localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
                 localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                ui.cooldownInputEdit.value = helperCooldownSeconds;
+                updateTimeInputs(helperCooldownSeconds);
                 renderAllSections();
             }
         });
 
-        // Chỉnh sửa thời gian khả dụng thủ công
         document.getElementById('btn-set-cooldown').addEventListener('click', () => {
-            const val = parseInt(ui.cooldownInputEdit.value);
-            if (!isNaN(val)) {
-                helperCooldownSeconds = val;
-                localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                renderAllSections();
-                alert("Đã cập nhật thời gian thành công!");
-            }
+            const h = parseInt(ui.inputHours.value) || 0;
+            const m = parseInt(ui.inputMins.value) || 0;
+            const s = parseInt(ui.inputSecs.value) || 0;
+            helperCooldownSeconds = (h * 3600) + (m * 60) + s;
+            localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
+            renderAllSections();
+            alert("Đã cập nhật thời gian khả dụng thành công!");
         });
 
         ui.assignSelect.addEventListener('change', (e) => {
@@ -448,16 +464,14 @@
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
 
-                // Đếm ngược thời gian làm việc 1h
                 if (workTimeRemaining > 0) {
                     workTimeRemaining--;
                     localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
                     if (workTimeRemaining <= 0) {
-                        renderAllSections(); // Hết 1h thì trả lại thời gian bình thường và kích hoạt 23h hồi chiêu
+                        renderAllSections(); 
                     }
                 }
                 
-                // Đếm ngược thời gian hồi chiêu
                 if (helperCooldownSeconds > 0) {
                     helperCooldownSeconds--;
                     localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
