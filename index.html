@@ -10,10 +10,20 @@
     <div class="container">
         <header>
             <h1>Clash of Clans Tracker</h1>
-            <p>Player Tag: <span id="player-tag">Đang tải...</span></p>
+            <p>Player Tag: <span id="player-tag">Chưa có dữ liệu</span></p>
         </header>
 
         <main>
+            <!-- Khu vực nhập mã JSON -->
+            <section class="card input-section">
+                <h2>Nhập dữ liệu JSON</h2>
+                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây..." rows="6"></textarea>
+                <div class="button-group">
+                    <button id="btn-process" class="btn-primary">Hiển thị dữ liệu</button>
+                    <button id="btn-clear" class="btn-secondary">Xóa ô nhập</button>
+                </div>
+            </section>
+
             <section class="card">
                 <h2>Đang Nâng Cấp (Upgrading)</h2>
                 <ul id="upgrading-list" class="item-list"></ul>
