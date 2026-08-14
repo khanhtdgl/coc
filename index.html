@@ -19,7 +19,6 @@
         h2 { margin-bottom: 15px; color: #3498db; border-bottom: 1px solid #3a3a3c; padding-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
         .card { background: #2c2c2e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         
-        /* Style riêng cho bảng 24h */
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
         
@@ -41,7 +40,7 @@
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
+        .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; min-width: 110px;}
         .timer.done { background: #27ae60; }
         .item-name { font-weight: 500; }
         .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
@@ -76,7 +75,6 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
-            <!-- BẢNG BÁO CÁO 24H (MỚI) -->
             <section class="card card-hot">
                 <h2>🔥 Xong trong 24h tới <span id="upcoming-count" class="badge" style="background:#e67e22;">0</span></h2>
                 <ul id="upcoming-list" class="item-list"></ul>
@@ -189,34 +187,32 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            // TÍNH NĂNG MỚI: Sắp xếp thời gian ngắn nhất lên đầu
             buildersData.sort((a, b) => a.timer - b.timer);
             labData.sort((a, b) => a.timer - b.timer);
             petsData.sort((a, b) => a.timer - b.timer);
 
-            // TÍNH NĂNG MỚI: Lọc các mục xong trong 24h (86400 giây)
             let allData = [...buildersData, ...labData, ...petsData];
             let upcomingData = allData.filter(item => item.timer <= 86400).sort((a, b) => a.timer - b.timer);
 
-            function renderList(dataArray, targetUI, skipNotify = false) {
+            function renderList(dataArray, targetUI, isMuted = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
                     li.innerHTML = `<span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> <span class="timer">Đang tính...</span>`;
                     targetUI.appendChild(li);
 
-                    // skipNotify giúp tránh việc thông báo đẩy kêu 2 lần khi 1 mục nằm ở 2 bảng
+                    // THÊM CỜ MỚI: isDone để tránh lỗi đơ đồng hồ, isMuted để tắt chuông
                     activeTimers.push({ 
                         name: itemName, 
                         endTime: jsonTimestamp + item.timer, 
                         domElement: li.querySelector('.timer'), 
-                        isNotified: skipNotify 
+                        isDone: false,
+                        isMuted: isMuted 
                     });
                 });
             }
 
-            // Render dữ liệu ra màn hình
-            renderList(upcomingData, ui.upcoming, true); // Bảng 24h không kích hoạt chuông (vì chuông được kích hoạt ở bảng chính bên dưới)
+            renderList(upcomingData, ui.upcoming, true); // true = Tắt chuông ở bảng này
             renderList(buildersData, ui.builders, false);
             renderList(labData, ui.lab, false);
             renderList(petsData, ui.pets, false);
@@ -234,19 +230,26 @@
             startRealtimeCountdown();
         }
 
+        // ĐÃ SỬA LẠI HÀM NÀY: Đồng hồ sẽ chạy đều cho tất cả mọi bảng
         function startRealtimeCountdown() {
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
+                
                 activeTimers.forEach(task => {
-                    if (task.isNotified) return;
+                    if (task.isDone) return; // Đã xong thì bỏ qua không đếm nữa
+                    
                     const remainingSeconds = task.endTime - now;
+                    
                     if (remainingSeconds > 0) {
                         task.domElement.textContent = formatTimeRealtime(remainingSeconds);
                     } else {
+                        // KHI HẾT GIỜ
+                        task.isDone = true;
                         task.domElement.textContent = "Xong! 🎉";
                         task.domElement.classList.add('done');
-                        task.isNotified = true;
-                        if ("Notification" in window && Notification.permission === "granted") {
+                        
+                        // Nếu chưa bị tắt chuông thì mới bật thông báo đẩy
+                        if (!task.isMuted && "Notification" in window && Notification.permission === "granted") {
                             new Notification("Hoàn thành nâng cấp!", { body: `${task.name} đã nâng cấp xong!` });
                         }
                     }
