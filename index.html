@@ -2,56 +2,67 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiến Trình Nâng Cấp - Làng Chính</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tiến Trình Nâng Cấp - CoC</title>
+    <!-- Nhúng file Manifest để biến web thành App -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f7f6; color: #333; padding: 20px; }
+        body { background-color: #f4f7f6; color: #333; padding: 15px; }
         .container { max-width: 800px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;}
-        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        header { text-align: center; margin-bottom: 20px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        
+        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
         textarea { width: 100%; padding: 12px; border: 2px dashed #bdc3c7; border-radius: 6px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; transition: 0.3s; }
         textarea:focus { border-color: #2980b9; background-color: #f8fbff; }
-        .button-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        button { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
+        
+        .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        button { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
+        
         .btn-info { background-color: #27ae60; color: white; flex: 1; }
-        .btn-info:hover { background-color: #2ecc71; }
-        .btn-primary { background-color: #2980b9; color: white; flex: 1.5; }
-        .btn-primary:hover { background-color: #3498db; }
-        .btn-secondary { background-color: #e74c3c; color: white; flex: 0.5; }
-        .btn-secondary:hover { background-color: #c0392b; }
-        .btn-warning { background-color: #f39c12; color: white; flex: 1; }
-        .btn-warning:hover { background-color: #d68910; }
+        .btn-primary { background-color: #2980b9; color: white; flex: 1; }
+        .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
+        .btn-warning { background-color: #f39c12; color: white; margin-top: 10px; }
+        .btn-update { background-color: #e67e22; color: white; font-size: 16px; margin-top: 15px; padding: 15px; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3); }
 
         .item-list { list-style: none; }
-        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db;}
+        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
         
         #builders-list li { border-left-color: #f39c12; }
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        .timer { color: #c0392b; font-size: 0.9em; background: #fadbd8; padding: 4px 8px; border-radius: 4px; font-weight: bold; min-width: 130px; text-align: center; }
+        .timer { color: #c0392b; font-size: 0.9em; background: #fadbd8; padding: 6px 10px; border-radius: 4px; font-weight: bold; text-align: center; white-space: nowrap; }
         .timer.done { background: #2ecc71; color: white; }
+        .item-name { font-weight: 500; }
         .empty-msg { color: #7f8c8d; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
         
-        .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; font-weight: bold; margin-left: auto; }
+        .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Trạm Theo Dõi Nâng Cấp - Làng Chính</h1>
-            <p>Player Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
+            <h1>Trạm Nâng Cấp Làng Chính</h1>
+            <p>Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
+            <!-- Nút Cập nhật (Chỉ hiện khi đã có dữ liệu) -->
+            <button id="btn-show-update" class="btn-update" style="display: none;">🔄 CẬP NHẬT DỮ LIỆU MỚI</button>
         </header>
 
         <main>
-            <section class="card input-section">
-                <textarea id="json-input" placeholder="Dán mã JSON của bạn vào đây (Nhấn Ctrl+V)..." rows="4"></textarea>
+            <!-- Khu vực nhập liệu (Sẽ tự ẩn đi khi có dữ liệu cho giống App) -->
+            <section class="card input-section" id="input-section">
+                <textarea id="json-input" placeholder="Dán mã JSON mới của bạn vào đây..." rows="4"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
-                    <button id="btn-process" class="btn-primary">🚀 Hiển thị dữ liệu</button>
+                    <button id="btn-process" class="btn-primary">🚀 Hiển thị</button>
                     <button id="btn-notify" class="btn-warning">🔔 Bật Thông Báo</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
                 </div>
@@ -59,40 +70,50 @@
             </section>
 
             <section class="card">
-                <h2>👷 Nhóm 1: Thợ Xây <span id="builder-count" class="badge">0</span></h2>
+                <h2>👷 Thợ Xây <span id="builder-count" class="badge">0</span></h2>
                 <ul id="builders-list" class="item-list"></ul>
             </section>
 
             <section class="card">
-                <h2>🧪 Nhóm 2: Phòng Thí Nghiệm <span id="lab-count" class="badge" style="background:#9b59b6;">0</span></h2>
+                <h2>🧪 Phòng Thí Nghiệm <span id="lab-count" class="badge" style="background:#9b59b6;">0</span></h2>
                 <ul id="lab-list" class="item-list"></ul>
             </section>
             
             <section class="card">
-                <h2>🐾 Nhóm 3: Chuồng Linh Thú <span id="pet-count" class="badge" style="background:#2ecc71;">0</span></h2>
+                <h2>🐾 Chuồng Linh Thú <span id="pet-count" class="badge" style="background:#2ecc71;">0</span></h2>
                 <ul id="pets-list" class="item-list"></ul>
             </section>
         </main>
     </div>
 
     <script>
+        // --- 1. ĐĂNG KÝ SERVICE WORKER CHO APP OFFLINE ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('App đã sẵn sàng chạy Offline!');
+                }).catch(err => console.error('Lỗi Service Worker:', err));
+            });
+        }
+
+        // --- 2. TỪ ĐIỂN ---
         const idDictionary = {
             102000039: "Kẻ hủy diệt", 107000001: "Máy ném bánh", 1000011: "Tháp Pháp sư",
             28000007: "Công tước Rồng", 28000000: "Man di Vương", 107000008: "Tiểu phu",
-            4000082: "Lính / Phép thuật", 73000017: "Linh thú đang huấn luyện", 1000000: "Hội trường Tòa thị chính"
+            4000082: "Lính / Phép thuật", 73000017: "Linh thú", 1000000: "Tòa thị chính"
         };
 
         function getName(id) { 
             if (idDictionary[id]) return idDictionary[id];
             const idStr = id.toString();
-            if (idStr.startsWith("1000")) return `Công trình (ID: ${id})`;
-            if (idStr.startsWith("4000") || idStr.startsWith("2600")) return `Lính/Phép (ID: ${id})`;
-            if (idStr.startsWith("7300")) return `Linh thú (ID: ${id})`;
-            return `Mục ID: ${id}`; 
+            if (idStr.startsWith("1000")) return `Công trình (${id})`;
+            if (idStr.startsWith("4000") || idStr.startsWith("2600")) return `Lính/Phép (${id})`;
+            if (idStr.startsWith("7300")) return `Linh thú (${id})`;
+            return `Mục (${id})`; 
         }
 
         function formatTimeRealtime(seconds) {
-            if (seconds <= 0) return "Hoàn thành! 🎉";
+            if (seconds <= 0) return "Xong! 🎉";
             const days = Math.floor(seconds / (3600 * 24));
             const hours = Math.floor((seconds % (3600 * 24)) / 3600);
             const mins = Math.floor((seconds % 3600) / 60);
@@ -107,21 +128,18 @@
         }
 
         const ui = {
-            builders: document.getElementById('builders-list'),
-            lab: document.getElementById('lab-list'),
-            pets: document.getElementById('pets-list'),
-            tag: document.getElementById('player-tag'),
-            error: document.getElementById('error-msg'),
-            input: document.getElementById('json-input'),
-            counts: { builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
+            builders: document.getElementById('builders-list'), lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
+            tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
+            counts: { builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') },
+            inputSection: document.getElementById('input-section'), btnUpdate: document.getElementById('btn-show-update')
         };
 
-        let activeTimers = []; // Mảng chứa các bộ đếm đang chạy
+        let activeTimers = []; 
         let countdownInterval = null;
 
         function clearUI() {
             ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
-            ui.tag.textContent = 'Đang xử lý...'; ui.error.style.display = 'none';
+            ui.tag.textContent = 'Đang chờ...'; ui.error.style.display = 'none';
             ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
             activeTimers = [];
             if (countdownInterval) clearInterval(countdownInterval);
@@ -131,24 +149,23 @@
             if (Array.isArray(obj)) {
                 obj.forEach(item => extractTimers(item, resultsArray));
             } else if (obj !== null && typeof obj === 'object') {
-                if (obj.timer && obj.timer > 0 && obj.data !== undefined) {
-                    resultsArray.push(obj);
-                }
-                for (let key in obj) {
-                    extractTimers(obj[key], resultsArray);
-                }
+                if (obj.timer && obj.timer > 0 && obj.data !== undefined) resultsArray.push(obj);
+                for (let key in obj) extractTimers(obj[key], resultsArray);
             }
         }
 
         function processData(data) {
             clearUI(); 
             if (!data || typeof data !== 'object') {
-                ui.error.textContent = "Lỗi: Dữ liệu JSON không hợp lệ."; ui.error.style.display = 'block'; return;
+                ui.error.textContent = "Lỗi JSON!"; ui.error.style.display = 'block'; return;
             }
-            ui.tag.textContent = data.tag || "Không có Tag";
+            ui.tag.textContent = data.tag || "Ẩn danh";
             ui.tag.style.color = "#27ae60";
 
-            // Lấy mốc thời gian khi file JSON được tạo
+            // Chuyển sang giao diện APP: Ẩn khu vực nhập liệu, hiện nút Cập nhật lớn
+            ui.inputSection.style.display = 'none';
+            ui.btnUpdate.style.display = 'flex';
+
             const jsonTimestamp = data.timestamp || Math.floor(Date.now() / 1000);
 
             let buildersData = [], labData = [], petsData = [];
@@ -156,30 +173,20 @@
             if (data.traps) extractTimers(data.traps, buildersData);
             if (data.heroes) extractTimers(data.heroes, buildersData);
             if (data.guardians) extractTimers(data.guardians, buildersData);
-
             if (data.units) extractTimers(data.units, labData);
             if (data.spells) extractTimers(data.spells, labData);
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
-
             if (data.pets) extractTimers(data.pets, petsData);
 
-            // Hàm tạo giao diện và lưu trữ dữ liệu đếm ngược
             function renderList(dataArray, targetUI) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
-                    const targetLevel = (item.lvl || 0) + 1;
                     const itemName = getName(item.data);
                     
-                    li.innerHTML = `<span>${itemName} ➡️ Lên cấp ${targetLevel}</span> <span class="timer">Đang tính toán...</span>`;
+                    li.innerHTML = `<span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> <span class="timer">Đang tính...</span>`;
                     targetUI.appendChild(li);
 
-                    // Đưa vào mảng quản lý đếm ngược (Thời điểm hoàn thành = Mốc JSON + Số giây)
-                    activeTimers.push({
-                        name: itemName,
-                        endTime: jsonTimestamp + item.timer,
-                        domElement: li.querySelector('.timer'),
-                        isNotified: false
-                    });
+                    activeTimers.push({ name: itemName, endTime: jsonTimestamp + item.timer, domElement: li.querySelector('.timer'), isNotified: false });
                 });
             }
 
@@ -191,56 +198,45 @@
             ui.counts.lab.textContent = ui.lab.children.length;
             ui.counts.pets.textContent = ui.pets.children.length;
 
-            if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây đang rảnh rỗi...</li>";
-            if (ui.lab.children.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Phòng thí nghiệm đang tắt đèn...</li>";
-            if (ui.pets.children.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Không có linh thú nào đang huấn luyện...</li>";
+            if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây rảnh rỗi...</li>";
+            if (ui.lab.children.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Tắt đèn...</li>";
+            if (ui.pets.children.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Trống...</li>";
 
-            // Khởi động bộ đếm nhịp mỗi 1 giây
             startRealtimeCountdown();
         }
 
-        // HÀM ĐẾM LÙI TỪNG GIÂY
         function startRealtimeCountdown() {
             countdownInterval = setInterval(() => {
-                const now = Math.floor(Date.now() / 1000); // Lấy thời gian thực tại của thiết bị
-
+                const now = Math.floor(Date.now() / 1000); 
                 activeTimers.forEach(task => {
-                    if (task.isNotified) return; // Nếu đã xong thì bỏ qua
-
+                    if (task.isNotified) return;
                     const remainingSeconds = task.endTime - now;
-
                     if (remainingSeconds > 0) {
                         task.domElement.textContent = formatTimeRealtime(remainingSeconds);
                     } else {
-                        // KHI HẾT GIỜ
-                        task.domElement.textContent = "Hoàn thành! 🎉";
+                        task.domElement.textContent = "Xong! 🎉";
                         task.domElement.classList.add('done');
                         task.isNotified = true;
-
-                        // Gửi thông báo đẩy
                         if ("Notification" in window && Notification.permission === "granted") {
-                            new Notification("Trạm Theo Dõi CoC", {
-                                body: `Xong rồi sếp ơi! ${task.name} đã nâng cấp hoàn tất!`,
-                                icon: "https://clashofclans.com/favicon.ico"
-                            });
+                            new Notification("Hoàn thành nâng cấp!", { body: `${task.name} đã nâng cấp xong!` });
                         }
                     }
                 });
             }, 1000);
         }
 
-        // NÚT XIN QUYỀN THÔNG BÁO
+        // SỰ KIỆN NÚT BẤM
+        document.getElementById('btn-show-update').addEventListener('click', () => {
+            ui.inputSection.style.display = 'block';
+            ui.btnUpdate.style.display = 'none';
+            ui.input.value = ''; // Làm trống ô để dán JSON mới
+            ui.input.focus();
+        });
+
         document.getElementById('btn-notify').addEventListener('click', () => {
-            if (!("Notification" in window)) {
-                alert("Trình duyệt của bạn không hỗ trợ thông báo!");
-                return;
-            }
+            if (!("Notification" in window)) return alert("Thiết bị không hỗ trợ!");
             Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    alert("✅ Đã bật thông báo thành công! Khi nào có công trình nâng cấp xong mình sẽ báo cho bạn.");
-                } else {
-                    alert("❌ Bạn đã từ chối nhận thông báo.");
-                }
+                if (permission === "granted") alert("✅ Đã bật thông báo!");
             });
         });
 
@@ -250,9 +246,9 @@
             try {
                 const data = JSON.parse(text); 
                 processData(data);
-                localStorage.setItem('saved_coc_json', text); // Lưu giữ dữ liệu 
+                localStorage.setItem('saved_coc_json', text);
             } catch (error) {
-                ui.error.textContent = "Mã JSON bị sai định dạng. Vui lòng copy đầy đủ từ đầu đến cuối!";
+                ui.error.textContent = "Lỗi mã JSON!";
                 ui.error.style.display = 'block';
             }
         }
@@ -270,12 +266,8 @@
         document.getElementById('btn-paste').addEventListener('click', async () => {
             try {
                 const text = await navigator.clipboard.readText(); 
-                ui.input.value = text;
-                handleJSON(text);
-            } catch (err) {
-                ui.error.textContent = "Trình duyệt chặn dán tự động. Vui lòng bấm vào ô trắng và nhấn Ctrl+V!";
-                ui.error.style.display = 'block';
-            }
+                ui.input.value = text; handleJSON(text);
+            } catch (err) { alert("Vui lòng dán thủ công!"); }
         });
 
         ui.input.addEventListener('paste', (e) => { setTimeout(() => { handleJSON(e.target.value); }, 100); });
@@ -284,6 +276,8 @@
             ui.input.value = ''; clearUI();
             ui.tag.textContent = 'Chưa có dữ liệu'; ui.tag.style.color = '#f1c40f';
             localStorage.removeItem('saved_coc_json');
+            ui.inputSection.style.display = 'block';
+            ui.btnUpdate.style.display = 'none';
         });
     </script>
 </body>
