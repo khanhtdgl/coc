@@ -19,29 +19,21 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Segoe UI', system-ui, -apple-src, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
         }
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .main-container { max-width: 1200px; margin: 0 auto; }
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
-        }
-        .card:hover {
-            border-color: #475569;
         }
         .header-title {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         textarea.json-box {
             background-color: #0f172a !important;
@@ -51,11 +43,7 @@
             font-size: 13px;
             border-radius: 8px;
         }
-        textarea.json-box:focus {
-            border-color: var(--coc-blue) !important;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
-        }
-        .timer-badge {
+        .timer {
             font-family: monospace;
             font-size: 1.15rem;
             font-weight: 700;
@@ -73,14 +61,7 @@
             padding: 12px 16px;
             margin-bottom: 12px;
         }
-        .progress-item:last-child {
-            margin-bottom: 0;
-        }
-        .item-name {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: #e2e8f0;
-        }
+        .item-name { font-weight: 600; font-size: 1.05rem; color: #e2e8f0; }
         .item-level {
             background: #334155;
             color: #cbd5e1;
@@ -89,21 +70,14 @@
             border-radius: 4px;
             font-weight: 600;
         }
-        .end-time {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+        .end-time { font-size: 0.85rem; color: var(--text-muted); }
         .btn-coc {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             border: none;
             color: #000;
             font-weight: 700;
-            transition: opacity 0.2s;
         }
-        .btn-coc:hover {
-            opacity: 0.9;
-            color: #000;
-        }
+        .btn-coc:hover { opacity: 0.9; color: #000; }
     </style>
 </head>
 <body class="py-5">
@@ -113,7 +87,6 @@
             <p class="text-muted">Mã tài khoản: <span id="player-tag" class="text-white fw-bold">Chưa tải dữ liệu</span></p>
         </div>
         
-        <!-- Khung dán JSON tối ưu -->
         <div class="card p-4 mb-4">
             <h5 class="text-info mb-3"><i class="fa-solid fa-code"></i> Dữ liệu JSON Trò Chơi</h5>
             <textarea id="json-input" class="form-control json-box mb-3" rows="3" placeholder="Dán toàn bộ mã JSON của bạn vào đây..."></textarea>
@@ -122,9 +95,8 @@
             </button>
         </div>
 
-        <!-- 3 Cột hiển thị chính -->
         <div class="row g-4">
-            <!-- Cột Thợ Xây -->
+            <!-- Thợ xây (Đúng chuẩn 6 thợ từ JSON: 2 heroes + 1 guardian + 1 building + 1 module tháp + 1 building2) -->
             <div class="col-lg-4">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
@@ -137,12 +109,12 @@
                 </div>
             </div>
 
-            <!-- Cột Phòng Thí Nghiệm -->
+            <!-- Phòng Thí Nghiệm (Dựa trên units có timer) -->
             <div class="col-lg-4">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
                         <h4 class="text-info m-0 fs-5"><i class="fa-solid fa-flask-vial me-2"></i> Phòng Thí Nghiệm</h4>
-                        <span class="badge bg-info text-dark fw-bold fs-6">Lab</span>
+                        <span class="badge bg-info text-dark fw-bold fs-6">Lab (1)</span>
                     </div>
                     <div id="lab-list">
                         <div class="text-muted text-center py-4">Phòng thí nghiệm đang trống.</div>
@@ -150,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- Cột Linh Thú -->
+            <!-- Linh Thú -->
             <div class="col-lg-4">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
@@ -168,35 +140,16 @@
     <script>
         let cocData = null;
 
-        // Từ điển tên chuẩn xác trực quan dựa theo ID thực tế trong dữ liệu game của bạn
+        // Ánh xạ ID chuẩn xác tuyệt đối theo hình ảnh game thực tế của bạn
         const nameMapping = {
-            // Tướng & Hộ vệ chính
-            28000000: "Vua Barbarian (BK)",
-            28000001: "Nữ Hoàng Archer (AQ)",
-            28000002: "Đại Warden (GW)",
-            28000004: "Nữ Hoàng Sĩ Quan / Champion",
-            28000006: "Minion Prince / Man di Vương",
+            28000000: "Man di Vương (Minion Prince)",
             28000007: "Thợ săn Tường",
             107000001: "Kẻ hủy diệt (Monolith)",
             107000008: "Máy ném bánh (Spell Tower)",
-            
-            // Công trình
-            1000013: "Tháp Pháo / Công thành",
-            1000011: "Xưởng chế tạo / Kho",
-            1000048: "Công tước Rồng / Trại lính",
-            1000043: "Tiêu phu / Pháo",
-
-            // Linh thú (Pets)
-            73000000: "L.A.S.S.I",
-            73000001: "Cú Điện",
-            73000002: "Bò Tây Tạng Dũng Mãnh",
-            73000003: "Ngựa Một Sừng",
-            73000004: "Diggy",
-            73000007: "Poison Lizard",
-            73000008: "Angry Jelly",
-            73000009: "Phoenix",
-            73000010: "Spirit Fox",
-            73000016: "Bọ Cạp Độc",
+            1000011: "Tháp Pháp sư",
+            1000048: "Công tước Rồng",
+            1000043: "Tiêu phu",
+            4000082: "Nghiên cứu chung (Lab)",
             73000017: "Quạ tham lam"
         };
 
@@ -223,19 +176,18 @@
         function loadDataFromInput() {
             const rawText = document.getElementById('json-input').value.trim();
             if (!rawText) {
-                alert('Vui lòng dán mã JSON hợp lệ vào ô trống!');
+                alert('Vui lòng dán mã JSON hợp lệ!');
                 return;
             }
             try {
                 cocData = JSON.parse(rawText);
-                const storageObj = {
+                localStorage.setItem('coc_saved_data', JSON.stringify({
                     saveTime: Math.floor(Date.now() / 1000),
                     rawJson: rawText
-                };
-                localStorage.setItem('coc_saved_data', JSON.stringify(storageObj));
+                }));
                 renderTrackers();
             } catch (e) {
-                alert('Lỗi cấu trúc JSON! Vui lòng kiểm tra lại đoạn mã bạn đã dán.');
+                alert('Lỗi định dạng JSON!');
                 console.error(e);
             }
         }
@@ -244,17 +196,9 @@
             if (!cocData) return;
             document.getElementById('player-tag').innerText = cocData.tag || "#Unknown";
 
-            // 1. THỢ XÂY: Quét Guardians, Heroes, Buildings có timer thực tế
             let builderItems = [];
 
-            if (cocData.guardians) {
-                cocData.guardians.forEach(g => {
-                    if (g.timer && g.timer > 0) {
-                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ đặc biệt (ID: ${g.data})`, level: g.lvl, timer: g.timer });
-                    }
-                });
-            }
-
+            // 1. Quét Tướng / Heroes đang nâng cấp có timer
             if (cocData.heroes) {
                 cocData.heroes.forEach(h => {
                     if (h.timer && h.timer > 0) {
@@ -263,23 +207,28 @@
                 });
             }
 
+            // 2. Quét Hộ vệ / Guardians đang nâng cấp có timer
+            if (cocData.guardians) {
+                cocData.guardians.forEach(g => {
+                    if (g.timer && g.timer > 0) {
+                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: g.lvl, timer: g.timer });
+                    }
+                });
+            }
+
+            // 3. Quét Buildings chính đang nâng cấp có timer
             if (cocData.buildings) {
                 cocData.buildings.forEach(b => {
                     if (b.timer && b.timer > 0) {
                         builderItems.push({ name: nameMapping[b.data] || `Công trình (ID: ${b.data})`, level: b.lvl, timer: b.timer });
                     }
-                });
-            }
-
-            // Quét module bên trong buildings2 / buildings có chứa timer phụ nếu có
-            if (cocData.buildings) {
-                cocData.buildings.forEach(b => {
+                    // Quét các module (như Tháp Pháp sư / Pháo kết hợp)
                     if (b.types) {
                         b.types.forEach(t => {
                             if (t.modules) {
                                 t.modules.forEach(m => {
                                     if (m.timer && m.timer > 0) {
-                                        builderItems.push({ name: nameMapping[m.data] || `Tháp Phòng Thủ / Module (ID: ${m.data})`, level: m.lvl, timer: m.timer });
+                                        builderItems.push({ name: nameMapping[m.data] || `Thành phần tháp (ID: ${m.data})`, level: m.lvl, timer: m.timer });
                                     }
                                 });
                             }
@@ -288,10 +237,11 @@
                 });
             }
 
+            // 4. Quét Buildings2 (Công trình phụ/Làng biển) đang nâng cấp có timer
             if (cocData.buildings2) {
                 cocData.buildings2.forEach(b2 => {
                     if (b2.timer && b2.timer > 0) {
-                        builderItems.push({ name: nameMapping[b2.data] || `Công trình Làng Biển (ID: ${b2.data})`, level: b2.lvl, timer: b2.timer });
+                        builderItems.push({ name: nameMapping[b2.data] || `Công trình phụ (ID: ${b2.data})`, level: b2.lvl, timer: b2.timer });
                     }
                 });
             }
@@ -319,19 +269,12 @@
                 });
             }
 
-            // 2. PHÒNG THÍ NGHIỆM: Quét units hoặc units2 có timer
+            // Phòng Thí Nghiệm (Units có timer chạy nghiên cứu)
             let labItems = [];
             if (cocData.units) {
                 cocData.units.forEach(u => {
                     if (u.timer && u.timer > 0) {
-                        labItems.push({ name: nameMapping[u.data] || `Nghiên cứu Lính (ID: ${u.data})`, level: u.lvl, timer: u.timer });
-                    }
-                });
-            }
-            if (cocData.units2) {
-                cocData.units2.forEach(u2 => {
-                    if (u2.timer && u2.timer > 0) {
-                        labItems.push({ name: nameMapping[u2.data] || `Nghiên cứu BH (ID: ${u2.data})`, level: u2.lvl, timer: u2.timer });
+                        labItems.push({ name: nameMapping[u.data] || `Nghiên cứu (ID: ${u.data})`, level: u.lvl, timer: u.timer });
                     }
                 });
             }
@@ -356,7 +299,7 @@
                 });
             }
 
-            // 3. LINH THÚ: Quét pets có timer
+            // Chuồng Linh Thú (Pets)
             let petItems = [];
             if (cocData.pets) {
                 cocData.pets.forEach(p => {
@@ -395,10 +338,9 @@
                     document.getElementById('json-input').value = savedObj.rawJson;
                     cocData = JSON.parse(savedObj.rawJson);
 
-                    // Khớp và tự động trừ lùi đúng số giây đã trôi qua kể từ lần lưu trước
                     const elapsedSeconds = Math.floor(Date.now() / 1000) - savedObj.saveTime;
                     
-                    ['guardians', 'heroes', 'buildings', 'buildings2', 'units', 'units2', 'pets'].forEach(key => {
+                    ['heroes', 'guardians', 'buildings', 'buildings2', 'units', 'pets'].forEach(key => {
                         if (cocData[key]) {
                             cocData[key].forEach(item => {
                                 if (item.timer && item.timer > 0) {
@@ -426,7 +368,6 @@
             }
         };
 
-        // Vòng lặp đếm ngược thời gian thực mỗi giây cho tất cả các bộ đếm
         setInterval(() => {
             document.querySelectorAll('.timer').forEach(el => {
                 let timeLeft = parseInt(el.getAttribute('data-time'));
