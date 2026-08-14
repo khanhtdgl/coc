@@ -143,13 +143,13 @@
                 
                 <div class="helper-row">
                     <div class="time-inputs">
-                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian chung:</label>
+                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian:</label>
                         <input type="number" id="shared-h" placeholder="Giờ" min="0"><span>h</span>
                         <input type="number" id="shared-m" placeholder="Phút" min="0" max="59"><span>m</span>
                         <input type="number" id="shared-s" placeholder="Giây" min="0" max="59"><span>s</span>
-                        <button id="shared-set-btn" class="btn-action" style="background: #2980b9; padding: 4px 8px; margin-left: 5px;">Đặt chung</button>
+                        <button id="shared-set-btn" class="btn-action" style="background: #2980b9; padding: 4px 8px; margin-left: 5px;">Đặt</button>
                     </div>
-                    <button id="shared-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset chung</button>
+                    <button id="shared-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset</button>
                 </div>
             </div>
 
@@ -257,7 +257,6 @@
         let activeTimers = []; 
         let countdownInterval = null;
 
-        // Thời gian chung cho cả 2 thợ (đồng bộ hoàn toàn)
         let sharedCd = 0;       
         let builderWorkRem = 0;  
         let selectedBuilderId = null; 
@@ -465,7 +464,6 @@
         };
 
         function updateStatusAndInputs() {
-            // Thợ xây
             if (builderWorkRem > 0) {
                 ui.builderStatus.textContent = "Đang làm việc (x8)";
                 ui.builderStatus.style.color = "#27ae60";
@@ -477,7 +475,6 @@
                 ui.builderStatus.style.color = "#f1c40f";
             }
 
-            // Phụ tá Lab
             if (labWorkRem > 0) {
                 ui.labStatus.textContent = "Đang nghiên cứu (x8)";
                 ui.labStatus.style.color = "#27ae60";
@@ -493,9 +490,10 @@
             ui.builderCooldown.textContent = timeStr;
             ui.labCooldown.textContent = timeStr;
 
-            ui.sH.value = Math.floor(sharedCd / 3600);
-            ui.sM.value = Math.floor((sharedCd % 3600) / 60);
-            ui.sS.value = sharedCd % 60;
+            // Chỉ cập nhật giá trị ô input nếu người dùng không đang focus vào ô đó để tránh việc đang gõ bị ghi đè
+            if (document.activeElement !== ui.sH) ui.sH.value = Math.floor(sharedCd / 3600);
+            if (document.activeElement !== ui.sM) ui.sM.value = Math.floor((sharedCd % 3600) / 60);
+            if (document.activeElement !== ui.sS) ui.sS.value = sharedCd % 60;
         }
 
         document.getElementById('shared-set-btn').addEventListener('click', () => {
