@@ -10,70 +10,66 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f7f6; color: #333; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; padding-bottom: 30px; }
+        body { background-color: #1c1c1e; color: #fff; padding: 15px; }
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 40px; }
         
-        header { text-align: center; margin-bottom: 20px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        header { text-align: center; margin-bottom: 20px; background: #2c2c2e; padding: 20px; border-radius: 12px; }
+        header h1 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
         
-        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 15px; color: #3498db; border-bottom: 1px solid #3a3a3c; padding-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
+        .card { background: #2c2c2e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         
-        textarea { width: 100%; padding: 12px; border: 2px dashed #bdc3c7; border-radius: 6px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; transition: 0.3s; }
-        textarea:focus { border-color: #2980b9; background-color: #f8fbff; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
+        textarea:focus { border-color: #3498db; }
         
         .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        button { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
+        button { padding: 12px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
         
         .btn-info { background-color: #27ae60; color: white; flex: 1; }
         .btn-primary { background-color: #2980b9; color: white; flex: 1; }
         .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
-        .btn-warning { background-color: #f39c12; color: white; margin-top: 10px; }
-        .btn-update { background-color: #e67e22; color: white; font-size: 16px; margin-top: 15px; padding: 15px; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3); }
 
         .item-list { list-style: none; }
-        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
+        .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
         
         #builders-list li { border-left-color: #f39c12; }
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        .timer { color: #c0392b; font-size: 0.9em; background: #fadbd8; padding: 6px 10px; border-radius: 4px; font-weight: bold; text-align: center; white-space: nowrap; }
-        .timer.done { background: #2ecc71; color: white; }
+        .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
+        .timer.done { background: #27ae60; }
         .item-name { font-weight: 500; }
-        .empty-msg { color: #7f8c8d; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
+        .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
 
-        /* KIỂU DÁNG NÚT LÀM MỚI APP GIỐNG TRONG ẢNH */
-        .app-footer { margin-top: 30px; text-align: center; }
+        /* NÚT LÀM MỚI APP ĐÚNG CHUẨN IOS */
+        .app-footer { margin-top: 30px; margin-bottom: 20px; text-align: center; }
         .btn-refresh-app {
-            background: transparent; color: #7f8c8d;
-            border: 1px dashed #bdc3c7; border-radius: 8px;
-            padding: 12px 20px; font-size: 14px; cursor: pointer;
+            background: transparent; color: #8e8e93;
+            border: 1px dashed #8e8e93; border-radius: 10px;
+            padding: 14px 20px; font-size: 14px; cursor: pointer;
             display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
         }
-        .btn-refresh-app:active { background: #ecf0f1; }
+        .btn-refresh-app:active { background: #3a3a3c; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Trạm Nâng Cấp Làng Chính</h1>
-            <p>Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
-            <button id="btn-show-update" class="btn-update" style="display: none;">🔄 CẬP NHẬT DỮ LIỆU JSON MỚI</button>
+            <h1>Trạm Nâng Cấp CoC</h1>
+            <p style="color: #8e8e93; font-size: 14px; margin-top: 5px;">Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
         </header>
 
         <main>
             <section class="card input-section" id="input-section">
-                <textarea id="json-input" placeholder="Dán mã JSON mới của bạn vào đây..." rows="4"></textarea>
+                <textarea id="json-input" placeholder="Dán mã JSON để cập nhật tiến trình game..." rows="3"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
-                    <button id="btn-process" class="btn-primary">🚀 Hiển thị</button>
-                    <button id="btn-notify" class="btn-warning">🔔 Bật Thông Báo</button>
+                    <button id="btn-process" class="btn-primary">🚀 Chạy</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
                 </div>
-                <p id="error-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
+                <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
             <section class="card">
@@ -92,7 +88,7 @@
             </section>
         </main>
 
-        <!-- NÚT KIỂM TRA CẬP NHẬT Ở DƯỚI CÙNG -->
+        <!-- ĐÂY LÀ NÚT CẬP NHẬT WEB APP BẠN CẦN -->
         <div class="app-footer">
             <button id="btn-refresh-app" class="btn-refresh-app">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.41L21.5 8"></path></svg>
@@ -102,14 +98,13 @@
     </div>
 
     <script>
-        // ĐĂNG KÝ APP OFFLINE
+        // Cài đặt Service Worker cho tính năng Offline
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js');
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
             });
         }
 
-        // TỪ ĐIỂN
         const idDictionary = {
             102000039: "Kẻ hủy diệt", 107000001: "Máy ném bánh", 1000011: "Tháp Pháp sư",
             28000007: "Công tước Rồng", 28000000: "Man di Vương", 107000008: "Tiểu phu",
@@ -143,8 +138,7 @@
         const ui = {
             builders: document.getElementById('builders-list'), lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
-            counts: { builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') },
-            inputSection: document.getElementById('input-section'), btnUpdate: document.getElementById('btn-show-update')
+            counts: { builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
         let activeTimers = []; 
@@ -175,8 +169,8 @@
             ui.tag.textContent = data.tag || "Ẩn danh";
             ui.tag.style.color = "#27ae60";
 
-            ui.inputSection.style.display = 'none';
-            ui.btnUpdate.style.display = 'flex';
+            // Giấu ô nhập JSON đi cho giống App, khi nào cần thì chạm vào Tag để mở ra
+            document.getElementById('input-section').style.display = 'none';
 
             const jsonTimestamp = data.timestamp || Math.floor(Date.now() / 1000);
 
@@ -229,50 +223,46 @@
                         task.domElement.textContent = "Xong! 🎉";
                         task.domElement.classList.add('done');
                         task.isNotified = true;
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            new Notification("Hoàn thành nâng cấp!", { body: `${task.name} đã nâng cấp xong!` });
-                        }
                     }
                 });
             }, 1000);
         }
 
-        // CÁC NÚT BẤM CƠ BẢN
-        document.getElementById('btn-show-update').addEventListener('click', () => {
-            ui.inputSection.style.display = 'block'; ui.btnUpdate.style.display = 'none';
-            ui.input.value = ''; ui.input.focus();
+        // Chạm vào phần Tag để mở lại ô dán JSON
+        document.getElementById('player-tag').parentElement.addEventListener('click', () => {
+            document.getElementById('input-section').style.display = 'block';
+            ui.input.focus();
         });
 
-        document.getElementById('btn-notify').addEventListener('click', () => {
-            if (!("Notification" in window)) return alert("Thiết bị không hỗ trợ!");
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") alert("✅ Đã bật thông báo!");
-            });
-        });
-
-        // XỬ LÝ NÚT "KIỂM TRA CẬP NHẬT / LÀM MỚI APP"
-        document.getElementById('btn-refresh-app').addEventListener('click', () => {
+        // ==========================================
+        // TÍNH NĂNG ÉP CẬP NHẬT TRANG WEB (LÀM MỚI APP)
+        // ==========================================
+        document.getElementById('btn-refresh-app').addEventListener('click', async () => {
             const btn = document.getElementById('btn-refresh-app');
-            btn.innerHTML = '⏳ Đang tải lại...'; // Đổi chữ để báo hiệu đang chạy
+            btn.innerHTML = '⏳ Đang xóa dữ liệu cũ và tải bản mới...';
             
-            // 1. Yêu cầu Service Worker kiểm tra bản cập nhật
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                    for(let registration of registrations) {
-                        registration.update(); 
+            try {
+                // 1. Gỡ bỏ toàn bộ Service Worker (Kẻ thù số 1 của việc cập nhật web)
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
                     }
-                });
+                }
                 
-                // 2. Dọn dẹp toàn bộ bộ nhớ Cache Offline để ép tải file mới từ Github
-                caches.keys().then((keyList) => {
-                    return Promise.all(keyList.map((key) => {
-                        return caches.delete(key);
-                    }));
-                }).then(() => {
-                    // 3. Tải lại trang hoàn toàn
-                    window.location.reload(true);
-                });
-            } else {
+                // 2. Xóa sạch sẽ toàn bộ Cache của trình duyệt
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(cache => caches.delete(cache)));
+                }
+
+                // 3. Tải lại trang với một tham số thời gian để đánh lừa trình duyệt tải file mới 100%
+                setTimeout(() => {
+                    window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+                }, 500);
+
+            } catch (err) {
+                // Nếu lỗi, sử dụng cách tải lại truyền thống
                 window.location.reload(true);
             }
         });
@@ -313,8 +303,6 @@
             ui.input.value = ''; clearUI();
             ui.tag.textContent = 'Chưa có dữ liệu'; ui.tag.style.color = '#f1c40f';
             localStorage.removeItem('saved_coc_json');
-            ui.inputSection.style.display = 'block';
-            ui.btnUpdate.style.display = 'none';
         });
     </script>
 </body>
