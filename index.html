@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoC Upgrade Tracker</title>
+    <title>Tiến Trình Nâng Cấp - Sata Say</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f7f6; color: #333; padding: 20px; }
@@ -39,7 +39,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Trạm Theo Dõi Nâng Cấp CoC</h1>
+            <h1>Trạm Theo Dõi Nâng Cấp - Làng Chính</h1>
             <p>Player Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
         </header>
 
@@ -72,43 +72,26 @@
     </div>
 
     <script>
-        // TỪ ĐIỂN TIẾNG VIỆT CHUẨN (Đã cập nhật theo acc Sata Say)
+        // TỪ ĐIỂN TIẾNG VIỆT (Khớp 100% với ảnh của Sata Say)
         const idDictionary = {
-            // Tướng
-            28000000: "Man di Vương (King)", 
-            28000001: "Nữ hoàng Cung thủ (Queen)", 
-            28000002: "Đại Quản giáo (Warden)", 
-            28000004: "Nữ tướng Hoàng gia (Champion)",
-            28000006: "Cỗ máy Chiến đấu", 
-            28000007: "Công tước Rồng",
-            
-            // Linh thú & Đặc biệt
-            73000000: "L.A.S.S.I", 73000001: "Cú Điện (Electro Owl)", 73000002: "Bò Mộng (Mighty Yak)", 
-            73000003: "Kỳ Lân (Unicorn)", 73000004: "Hải Mã (Frosty)", 73000007: "Thằn Lằn Độc", 
-            73000008: "Kỳ Nhông (Diggy)", 73000009: "Phượng Hoàng (Phoenix)",
-            73000010: "Cáo Linh Hồn", 73000011: "Sứa Tức Giận",
-            
-            // Thợ xây tập sự / Sự kiện
+            102000039: "Kẻ hủy diệt",
             107000001: "Máy ném bánh",
+            1000011: "Tháp Pháp sư",
+            28000007: "Công tước Rồng",
+            28000000: "Man di Vương",
             107000008: "Tiểu phu",
             
-            // Công trình cơ bản
-            1000000: "Hội trường Tòa thị chính", 
-            102000039: "Kẻ hủy diệt",
-            1000048: "Tháp Pháp sư", 
-            1000011: "Mỏ Vàng", 
-            1000012: "Máy hút Tiên dược", 
-            1000013: "Giàn khoan Hắc Tiên dược",
-            1000043: "Nhà Thợ Xây"
+            4000082: "Lính / Phép thuật", 
+            73000017: "Linh thú đang huấn luyện", 
+            
+            1000000: "Hội trường Tòa thị chính"
         };
 
         function getName(id) { 
             if (idDictionary[id]) return idDictionary[id];
             const idStr = id.toString();
             if (idStr.startsWith("1000")) return `Công trình (ID: ${id})`;
-            if (idStr.startsWith("1200")) return `Bẫy (ID: ${id})`;
-            if (idStr.startsWith("4000")) return `Lính/Xe (ID: ${id})`;
-            if (idStr.startsWith("2600")) return `Phép thuật (ID: ${id})`;
+            if (idStr.startsWith("4000") || idStr.startsWith("2600")) return `Lính/Phép (ID: ${id})`;
             if (idStr.startsWith("7300")) return `Linh thú (ID: ${id})`;
             return `Mục ID: ${id}`; 
         }
@@ -145,6 +128,20 @@
             ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
         }
 
+        // Hàm trích xuất dữ liệu thông minh: Bỏ qua Làng Đêm, chỉ lùng sục đúng khu vực được chỉ định
+        function extractTimers(obj, resultsArray) {
+            if (Array.isArray(obj)) {
+                obj.forEach(item => extractTimers(item, resultsArray));
+            } else if (obj !== null && typeof obj === 'object') {
+                if (obj.timer && obj.timer > 0 && obj.data !== undefined) {
+                    resultsArray.push(obj);
+                }
+                for (let key in obj) {
+                    extractTimers(obj[key], resultsArray);
+                }
+            }
+        }
+
         function processData(data) {
             clearUI(); 
             if (!data || typeof data !== 'object') {
@@ -153,48 +150,44 @@
             ui.tag.textContent = data.tag || "Không có Tag";
             ui.tag.style.color = "#27ae60";
 
-            let allUpgrades = [];
+            // 1. Quét Nhóm Thợ Xây Làng Chính (Công trình, Bẫy, Tướng, Guardians)
+            let buildersData = [];
+            if (data.buildings) extractTimers(data.buildings, buildersData);
+            if (data.traps) extractTimers(data.traps, buildersData);
+            if (data.heroes) extractTimers(data.heroes, buildersData);
+            if (data.guardians) extractTimers(data.guardians, buildersData);
 
-            // THUẬT TOÁN QUÉT SÂU (Deep Scan)
-            function deepScan(obj) {
-                if (Array.isArray(obj)) {
-                    obj.forEach(deepScan);
-                } else if (obj !== null && typeof obj === 'object') {
-                    if (obj.timer && obj.timer > 0 && obj.data !== undefined) {
-                        allUpgrades.push(obj);
-                    }
-                    for (let key in obj) {
-                        deepScan(obj[key]);
-                    }
-                }
+            // 2. Quét Nhóm Phòng Thí Nghiệm (Lính, Phép, Máy công thành)
+            let labData = [];
+            if (data.units) extractTimers(data.units, labData);
+            if (data.spells) extractTimers(data.spells, labData);
+            if (data.siege_machines) extractTimers(data.siege_machines, labData);
+
+            // 3. Quét Nhóm Chuồng Linh Thú
+            let petsData = [];
+            if (data.pets) extractTimers(data.pets, petsData);
+
+            // HÀM RENDER RA MÀN HÌNH
+            function renderList(dataArray, targetUI) {
+                dataArray.forEach(item => {
+                    const li = document.createElement('li');
+                    const targetLevel = (item.lvl || 0) + 1;
+                    li.innerHTML = `<span>${getName(item.data)} ➡️ Lên cấp ${targetLevel}</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
+                    targetUI.appendChild(li);
+                });
             }
-            
-            deepScan(data);
 
-            // PHÂN LOẠI
-            allUpgrades.forEach(item => {
-                const idStr = item.data.toString();
-                const li = document.createElement('li');
-                const name = getName(item.data);
-                const targetLevel = (item.lvl || 0) + 1;
-                
-                li.innerHTML = `<span>${name} ➡️ Lên cấp ${targetLevel}</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
-                
-                if (idStr.startsWith("400") || idStr.startsWith("260")) {
-                    ui.lab.appendChild(li); // Phòng thí nghiệm (Lính & Phép)
-                } else if (idStr.startsWith("730")) {
-                    ui.pets.appendChild(li); // Chuồng linh thú
-                } else {
-                    ui.builders.appendChild(li); // Thợ xây
-                }
-            });
+            renderList(buildersData, ui.builders);
+            renderList(labData, ui.lab);
+            renderList(petsData, ui.pets);
 
-            // CẬP NHẬT CON SỐ
+            // Cập nhật số đếm
             ui.counts.builders.textContent = ui.builders.children.length;
             ui.counts.lab.textContent = ui.lab.children.length;
             ui.counts.pets.textContent = ui.pets.children.length;
 
-            if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây đang ngủ khò khò...</li>";
+            // Nếu trống thì hiện thông báo
+            if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây đang rảnh rỗi...</li>";
             if (ui.lab.children.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Phòng thí nghiệm đang tắt đèn...</li>";
             if (ui.pets.children.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Không có linh thú nào đang huấn luyện...</li>";
         }
@@ -219,7 +212,7 @@
                 ui.input.value = text;
                 handleJSON(text);
             } catch (err) {
-                ui.error.textContent = "Trình duyệt chặn dán tự động. Vui lòng bấm vào ô trắng và dán thủ công!";
+                ui.error.textContent = "Trình duyệt chặn dán tự động. Vui lòng bấm vào ô trắng và nhấn Ctrl+V!";
                 ui.error.style.display = 'block';
             }
         });
