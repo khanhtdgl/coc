@@ -90,10 +90,10 @@
 
         <main>
             <section class="card input-section" id="input-section">
-                <textarea id="json-input" placeholder="Dán mã JSON để tự động đồng bộ..." rows="3"></textarea>
+                <textarea id="json-input" placeholder="Dán mã JSON để xem tiến trình..." rows="3"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
-                    <button id="btn-process" class="btn-primary">🚀 Lưu & Đồng bộ</button>
+                    <button id="btn-process" class="btn-primary">🚀 Chạy</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
@@ -198,9 +198,6 @@
         let activeTimers = []; 
         let countdownInterval = null;
         let assignedBuilderApprenticeId = null;
-
-        // Dùng chung một mã kho lưu trữ ẩn tự động theo GitHub User của bạn
-        const SYNC_KEY = "coc_sync_data_khanhtdgl";
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -400,31 +397,13 @@
             } catch (err) { window.location.reload(true); }
         });
 
-        // Tự động đồng bộ ngầm thông qua dịch vụ lưu trữ đám mây công khai miễn phí không cần tài khoản
-        async function syncToCloud(jsonText) {
-            try {
-                // Lưu vào bộ nhớ đám mây dùng chung dựa trên tên định danh riêng của bạn
-                await fetch(`https://api.jsonbin.io/v3/b`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Access-Key': '$2a$10$C8qTz1Z2Y3X4W5V6U7T8S9r0q1p2o3n4m5l6k7j8h9g0f1e2d3c4b' // Public shared sync key
-                    },
-                    body: jsonText
-                });
-            } catch (e) {
-                // Fallback lưu trực tiếp vào máy nếu mất mạng
-                localStorage.setItem(SYNC_KEY, jsonText);
-            }
-        }
-
         function handleJSON(jsonText) {
             const text = jsonText.trim();
             if (!text) return;
             try {
                 const data = JSON.parse(text); 
                 processData(data);
-                localStorage.setItem(SYNC_KEY, text);
+                localStorage.setItem('saved_coc_json', text);
             } catch (error) {
                 ui.error.textContent = "Lỗi mã JSON!";
                 ui.error.style.display = 'block';
@@ -434,34 +413,26 @@
         window.addEventListener('DOMContentLoaded', () => {
             if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = parseInt(localStorage.getItem('coc_assigned_apprentice'));
 
-            // Tự động lấy dữ liệu đã lưu gần nhất trên thiết bị
-            const savedData = localStorage.getItem(SYNC_KEY);
+            const savedData = localStorage.getItem('saved_coc_json');
             if (savedData) { 
                 ui.input.value = savedData; 
                 handleJSON(savedData); 
             }
         });
 
-        document.getElementById('btn-process').addEventListener('click', () => { 
-            handleJSON(ui.input.value); 
-        });
+        document.getElementById('btn-process').addEventListener('click', () => { handleJSON(ui.input.value); });
         
         document.getElementById('btn-paste').addEventListener('click', async () => {
-            try { 
-                const text = await navigator.clipboard.readText(); 
-                ui.input.value = text; 
-                handleJSON(text); 
-            } catch (err) { alert("Vui lòng dán thủ công!"); }
+            try { const text = await navigator.clipboard.readText(); ui.input.value = text; handleJSON(text); } 
+            catch (err) { alert("Vui lòng dán thủ công!"); }
         });
 
-        ui.input.addEventListener('paste', (e) => { 
-            setTimeout(() => { handleJSON(e.target.value); }, 100); 
-        });
+        ui.input.addEventListener('paste', (e) => { setTimeout(() => { handleJSON(e.target.value); }, 100); });
 
         document.getElementById('btn-clear').addEventListener('click', () => {
             ui.input.value = ''; clearUI();
             ui.tag.textContent = 'Chưa có dữ liệu'; ui.tag.style.color = '#f1c40f';
-            localStorage.removeItem(SYNC_KEY);
+            localStorage.removeItem('saved_coc_json');
             localStorage.removeItem('coc_assigned_apprentice');
         });
     </script>
