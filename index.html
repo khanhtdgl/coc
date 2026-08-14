@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tiến Trình Nâng Cấp - CoC</title>
-    <!-- Nhúng file Manifest để biến web thành App -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="apple-touch-icon" href="icon.png">
@@ -45,19 +44,29 @@
         .empty-msg { color: #7f8c8d; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
+
+        /* THANH THÔNG BÁO CẬP NHẬT APP */
+        #app-update-banner {
+            display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: #27ae60; color: white; padding: 12px 24px; border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); z-index: 9999; font-weight: bold;
+            cursor: pointer; text-align: center; white-space: nowrap; animation: pop 0.5s ease-out;
+        }
+        @keyframes pop { 0% { transform: translate(-50%, 50px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
     </style>
 </head>
 <body>
+    <!-- NÚT BẤM CẬP NHẬT PHIÊN BẢN (ẨN) -->
+    <div id="app-update-banner">✨ Có bản cập nhật Web mới! Bấm để tải</div>
+
     <div class="container">
         <header>
             <h1>Trạm Nâng Cấp Làng Chính</h1>
             <p>Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
-            <!-- Nút Cập nhật (Chỉ hiện khi đã có dữ liệu) -->
-            <button id="btn-show-update" class="btn-update" style="display: none;">🔄 CẬP NHẬT DỮ LIỆU MỚI</button>
+            <button id="btn-show-update" class="btn-update" style="display: none;">🔄 CẬP NHẬT DỮ LIỆU JSON MỚI</button>
         </header>
 
         <main>
-            <!-- Khu vực nhập liệu (Sẽ tự ẩn đi khi có dữ liệu cho giống App) -->
             <section class="card input-section" id="input-section">
                 <textarea id="json-input" placeholder="Dán mã JSON mới của bạn vào đây..." rows="4"></textarea>
                 <div class="button-group">
@@ -87,16 +96,40 @@
     </div>
 
     <script>
-        // --- 1. ĐĂNG KÝ SERVICE WORKER CHO APP OFFLINE ---
+        // --- HỆ THỐNG KIỂM TRA PHIÊN BẢN (APP UPDATE) ---
+        let newWorker;
+        const updateBanner = document.getElementById('app-update-banner');
+
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('App đã sẵn sàng chạy Offline!');
-                }).catch(err => console.error('Lỗi Service Worker:', err));
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                reg.addEventListener('updatefound', () => {
+                    newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        // Nếu có bản cài mới trên Github, hiện cái nút nổi màu xanh lên
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            updateBanner.style.display = 'block';
+                        }
+                    });
+                });
+            });
+
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    window.location.reload(); // Tự động load lại trang khi bấm cập nhật
+                    refreshing = true;
+                }
             });
         }
 
-        // --- 2. TỪ ĐIỂN ---
+        // Khi người dùng bấm vào thanh thông báo màu xanh dưới cùng
+        updateBanner.addEventListener('click', () => {
+            if (newWorker) {
+                newWorker.postMessage('SKIP_WAITING');
+            }
+        });
+
+        // --- CÁC HÀM XỬ LÝ DỮ LIỆU COC (GIỮ NGUYÊN NHƯ CŨ) ---
         const idDictionary = {
             102000039: "Kẻ hủy diệt", 107000001: "Máy ném bánh", 1000011: "Tháp Pháp sư",
             28000007: "Công tước Rồng", 28000000: "Man di Vương", 107000008: "Tiểu phu",
@@ -162,7 +195,6 @@
             ui.tag.textContent = data.tag || "Ẩn danh";
             ui.tag.style.color = "#27ae60";
 
-            // Chuyển sang giao diện APP: Ẩn khu vực nhập liệu, hiện nút Cập nhật lớn
             ui.inputSection.style.display = 'none';
             ui.btnUpdate.style.display = 'flex';
 
@@ -225,11 +257,10 @@
             }, 1000);
         }
 
-        // SỰ KIỆN NÚT BẤM
         document.getElementById('btn-show-update').addEventListener('click', () => {
             ui.inputSection.style.display = 'block';
             ui.btnUpdate.style.display = 'none';
-            ui.input.value = ''; // Làm trống ô để dán JSON mới
+            ui.input.value = ''; 
             ui.input.focus();
         });
 
