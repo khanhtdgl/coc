@@ -25,31 +25,6 @@
         
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
-        
-        .apprentice-card { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .apprentice-card.lab-card { border-color: #9b59b6; }
-        .apprentice-card.lab-card .apprentice-left h3 { color: #af7ac5; }
-        
-        .apprentice-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .apprentice-left h3 { color: #f39c12; font-size: 1.1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-        .apprentice-left p { font-size: 0.8rem; color: #bbb; }
-        
-        .apprentice-stats { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .apprentice-box { background: #2c2c2e; border: 1px solid #4a4a4c; padding: 6px 10px; border-radius: 8px; text-align: center; }
-        .apprentice-box .label { font-size: 0.65rem; color: #aaa; display: block; }
-        .apprentice-box .value { font-size: 0.85rem; font-weight: bold; color: #fff; }
-        .apprentice-box .value.highlight { color: #f1c40f; }
-
-        .apprentice-row { display: flex; align-items: center; justify-content: space-between; background: #2c2c2e; padding: 10px; border-radius: 8px; border: 1px solid #4a4a4c; gap: 10px; flex-wrap: wrap; }
-        .apprentice-row label { font-size: 0.85rem; color: #f39c12; font-weight: bold; }
-        .lab-card .apprentice-row label { color: #af7ac5; }
-        
-        .time-inputs { display: flex; gap: 5px; align-items: center; flex: 1; }
-        .time-inputs input { width: 60px; padding: 6px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; text-align: center; outline: none; }
-        .time-inputs span { font-size: 0.85rem; color: #aaa; }
-
-        .btn-action-app { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; white-space: nowrap; }
-        .btn-action-app:disabled { background: #555; color: #888; cursor: not-allowed; }
 
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
@@ -63,9 +38,6 @@
 
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
-        
-        .item-list li.has-apprentice { border-left-color: #e67e22; background: rgba(230, 126, 34, 0.08); }
-        .item-list li.has-lab-helper { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.08); }
 
         #upcoming-list li { border-left-color: #e67e22; }
         #builders-list li { border-left-color: #f39c12; }
@@ -74,19 +46,6 @@
 
         .item-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .item-name { font-weight: 600; font-size: 0.95rem; color: #fff; }
-
-        .saved-time { font-size: 0.75rem; color: #e67e22; font-weight: bold; display: none; }
-        .has-apprentice .saved-time, .has-lab-helper .saved-time { display: inline-block; }
-
-        /* Nút thợ phụ ngay trên item đang làm việc */
-        .btn-item-helper {
-            background: #2c2c2e; color: #8e8e93; border: 1px solid #4a4a4c; border-radius: 6px;
-            padding: 4px 8px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-            transition: 0.2s; white-space: nowrap; margin-top: 4px;
-        }
-        .btn-item-helper.active { background: #e67e22; color: #fff; border-color: #f39c12; font-weight: bold; }
-        .lab-card-item .btn-item-helper.active { background: #9b59b6; border-color: #af7ac5; }
-        .btn-item-helper:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .timer-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
         .timer { color: #fff; font-size: 0.85em; background: #e74c3c; padding: 5px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
@@ -123,76 +82,6 @@
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
-
-            <!-- BẢNG THỢ XÂY HỌC VIỆC -->
-            <div class="apprentice-card">
-                <div class="apprentice-top">
-                    <div class="apprentice-left">
-                        <h3>👷 Thợ xây học việc cấp 8</h3>
-                        <p>Làm việc 1 giờ với tốc độ x8, sau đó hồi chiêu 23 giờ</p>
-                    </div>
-                    <div class="apprentice-stats">
-                        <div class="apprentice-box">
-                            <span class="label">Trạng thái</span>
-                            <span class="value highlight" id="apprentice-status">Đang tải...</span>
-                        </div>
-                        <div class="apprentice-box">
-                            <span class="label">Thời gian còn lại</span>
-                            <span class="value highlight" id="cooldown-timer">Đang tính...</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="apprentice-row">
-                    <button id="btn-start-work" class="btn-action-app">Bắt đầu làm việc (1h)</button>
-                    <button id="btn-cancel-work" class="btn-action-app" style="background: #e74c3c;">Hủy (Vẫn chạy 1h)</button>
-                </div>
-
-                <div class="apprentice-row">
-                    <label>⏱️ Chỉnh sửa thời gian khả dụng chung:</label>
-                    <div class="time-inputs">
-                        <input type="number" id="input-hours" placeholder="Giờ" min="0"> <span>h</span>
-                        <input type="number" id="input-mins" placeholder="Phút" min="0" max="59"> <span>m</span>
-                        <input type="number" id="input-secs" placeholder="Giây" min="0" max="59"> <span>s</span>
-                    </div>
-                    <button id="btn-set-cooldown" class="btn-action-app" style="background: #2980b9;">Cập nhật</button>
-                </div>
-            </div>
-
-            <!-- BẢNG PHỤ TÁ PHÒNG THÍ NGHIỆM -->
-            <div class="apprentice-card lab-card">
-                <div class="apprentice-top">
-                    <div class="apprentice-left">
-                        <h3>🧪 Phụ tá Phòng Thí Nghiệm</h3>
-                        <p>Nghiên cứu 1 giờ với tốc độ x8, sau đó hồi chiêu 23 giờ</p>
-                    </div>
-                    <div class="apprentice-stats">
-                        <div class="apprentice-box">
-                            <span class="label">Trạng thái</span>
-                            <span class="value highlight" id="lab-helper-status">Đang tải...</span>
-                        </div>
-                        <div class="apprentice-box">
-                            <span class="label">Thời gian còn lại</span>
-                            <span class="value highlight" id="lab-cooldown-timer">Đang tính...</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="apprentice-row">
-                    <button id="btn-lab-start-work" class="btn-action-app" style="background: #9b59b6;">Bắt đầu nghiên cứu (1h)</button>
-                    <button id="btn-lab-cancel-work" class="btn-action-app" style="background: #e74c3c;">Hủy (Vẫn chạy 1h)</button>
-                </div>
-
-                <div class="apprentice-row">
-                    <label>⏱️ Chỉnh sửa thời gian khả dụng chung:</label>
-                    <div class="time-inputs">
-                        <input type="number" id="lab-input-hours" placeholder="Giờ" min="0"> <span>h</span>
-                        <input type="number" id="lab-input-mins" placeholder="Phút" min="0" max="59"> <span>m</span>
-                        <input type="number" id="lab-input-secs" placeholder="Giây" min="0" max="59"> <span>s</span>
-                    </div>
-                    <button id="btn-lab-set-cooldown" class="btn-action-app" style="background: #8e44ad;">Cập nhật</button>
-                </div>
-            </div>
 
             <section class="card card-hot">
                 <h2>🔥 Xong trong 24h tới <span id="upcoming-count" class="badge" style="background:#e67e22;">0</span></h2>
@@ -233,7 +122,7 @@
         }
 
         function formatTimeRealtime(seconds) {
-            if (seconds <= 0) return "Khả dụng ngay! 🎉";
+            if (seconds <= 0) return "Xong! 🎉";
             const days = Math.floor(seconds / (3600 * 24));
             const hours = Math.floor((seconds % (3600 * 24)) / 3600);
             const mins = Math.floor((seconds % 3600) / 60);
@@ -247,14 +136,6 @@
             return timeParts.join(' ');
         }
 
-        function formatSavedTime(originalSeconds, adjustedSeconds) {
-            const diff = originalSeconds - adjustedSeconds;
-            if (diff <= 0) return "";
-            const hours = Math.floor(diff / 3600);
-            const mins = Math.floor((diff % 3600) / 60);
-            return `⏱️ Tiết kiệm do x8 (1h): ${hours > 0 ? hours + 'h ' : ''}${mins}m`;
-        }
-
         function formatTargetDate(endTimeInSeconds) {
             const date = new Date(endTimeInSeconds * 1000);
             const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
@@ -266,36 +147,11 @@
             lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
             section: document.getElementById('input-section'),
-            cooldown: document.getElementById('cooldown-timer'),
-            status: document.getElementById('apprentice-status'),
-            inputHours: document.getElementById('input-hours'),
-            inputMins: document.getElementById('input-mins'),
-            inputSecs: document.getElementById('input-secs'),
-            btnStartWork: document.getElementById('btn-start-work'),
-            btnCancelWork: document.getElementById('btn-cancel-work'),
-            
-            labCooldown: document.getElementById('lab-cooldown-timer'),
-            labStatus: document.getElementById('lab-helper-status'),
-            labInputHours: document.getElementById('lab-input-hours'),
-            labInputMins: document.getElementById('lab-input-mins'),
-            labInputSecs: document.getElementById('lab-input-secs'),
-            btnLabStartWork: document.getElementById('btn-lab-start-work'),
-            btnLabCancelWork: document.getElementById('btn-lab-cancel-work'),
-
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
         let activeTimers = []; 
         let countdownInterval = null;
-        let assignedBuilderApprenticeId = null;
-        let helperCooldownSeconds = 0;
-        let workTimeRemaining = 0; 
-        let hasUsedTodayBuilder = false; // Đã chọn và làm việc hôm nay rồi thì không được chọn lại
-
-        let assignedLabHelperId = null;
-        let labCooldownSeconds = 0;
-        let labWorkTimeRemaining = 0;
-        let hasUsedTodayLab = false;
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -314,55 +170,11 @@
             }
         }
 
-        function calculateX8Time(timerSeconds) {
-            const hoursReduction = 7 * 3600; 
-            return Math.max(0, timerSeconds - hoursReduction);
-        }
-
         let globalGameData = null;
 
         function processData(data) {
             globalGameData = data;
-            
-            if (data.helpers && Array.isArray(data.helpers)) {
-                const helperLvl8 = data.helpers.find(h => h.lvl === 8);
-                if (helperLvl8 && helperLvl8.helper_cooldown !== undefined) {
-                    helperCooldownSeconds = helperLvl8.helper_cooldown;
-                    labCooldownSeconds = helperLvl8.helper_cooldown; 
-                }
-            }
-
-            const savedWorkTime = localStorage.getItem('coc_work_time_remaining');
-            if (savedWorkTime !== null) workTimeRemaining = parseInt(savedWorkTime);
-
-            const savedLabWork = localStorage.getItem('coc_lab_work_time_remaining');
-            if (savedLabWork !== null) labWorkTimeRemaining = parseInt(savedLabWork);
-
-            const savedLabCd = localStorage.getItem('coc_lab_cooldown');
-            if (savedLabCd !== null) labCooldownSeconds = parseInt(savedLabCd);
-
-            const savedUsedBuilder = localStorage.getItem('coc_used_today_builder');
-            if (savedUsedBuilder !== null) hasUsedTodayBuilder = savedUsedBuilder === 'true';
-
-            const savedUsedLab = localStorage.getItem('coc_used_today_lab');
-            if (savedUsedLab !== null) hasUsedTodayLab = savedUsedLab === 'true';
-
-            updateAllTimeInputs();
             renderAllSections();
-        }
-
-        function updateAllTimeInputs() {
-            const h = Math.floor(helperCooldownSeconds / 3600);
-            const m = Math.floor((helperCooldownSeconds % 3600) / 60);
-            const s = helperCooldownSeconds % 60;
-
-            ui.inputHours.value = h;
-            ui.inputMins.value = m;
-            ui.inputSecs.value = s;
-
-            ui.labInputHours.value = h;
-            ui.labInputMins.value = m;
-            ui.labInputSecs.value = s;
         }
 
         function renderAllSections() {
@@ -388,102 +200,23 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            if (buildersData.length > 0) {
-                if (!assignedBuilderApprenticeId || !buildersData.some(i => i.data == assignedBuilderApprenticeId)) {
-                    assignedBuilderApprenticeId = buildersData[0].data;
-                }
-            }
-
-            if (labData.length > 0) {
-                if (!assignedLabHelperId || !labData.some(i => i.data == assignedLabHelperId)) {
-                    assignedLabHelperId = labData[0].data;
-                }
-            }
-
-            const isWorking = workTimeRemaining > 0;
-            const isLabWorking = labWorkTimeRemaining > 0;
-
-            buildersData.forEach(item => {
-                item.originalTimer = item.timer;
-                let t = item.timer;
-                if (isWorking && item.data == assignedBuilderApprenticeId) {
-                    t = calculateX8Time(t);
-                }
-                item.adjustedTimer = t;
-            });
-
-            labData.forEach(item => {
-                item.originalTimer = item.timer;
-                let t = item.timer;
-                if (isLabWorking && item.data == assignedLabHelperId) {
-                    t = calculateX8Time(t);
-                }
-                item.adjustedTimer = t;
-            });
-            
-            petsData.forEach(item => {
-                item.originalTimer = item.timer;
-                item.adjustedTimer = item.timer;
-            });
-
-            buildersData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
-            labData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
-            petsData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            buildersData.sort((a, b) => a.timer - b.timer);
+            labData.sort((a, b) => a.timer - b.timer);
+            petsData.sort((a, b) => a.timer - b.timer);
 
             let allData = [...buildersData, ...labData, ...petsData];
-            let upcomingData = allData.filter(item => item.adjustedTimer <= 86400).sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            let upcomingData = allData.filter(item => item.timer <= 86400).sort((a, b) => a.timer - b.timer);
 
-            function renderList(dataArray, targetUI, isMuted = false, allowAssign = false, isLabList = false) {
+            function renderList(dataArray, targetUI, isMuted = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
-                    const endTime = jsonTimestamp + item.adjustedTimer;
+                    const endTime = jsonTimestamp + item.timer;
                     const dateStr = formatTargetDate(endTime);
-                    
-                    let isAssigned = false;
-                    if (allowAssign && isWorking && (item.data == assignedBuilderApprenticeId)) isAssigned = true;
-                    if (isLabList && isLabWorking && (item.data == assignedLabHelperId)) isAssigned = true;
-
-                    const savedTimeStr = formatSavedTime(item.originalTimer, item.adjustedTimer);
-
-                    if (isAssigned) {
-                        if (isLabList) li.classList.add('has-lab-helper');
-                        else li.classList.add('has-apprentice');
-                    }
-
-                    // Tạo nút thợ phụ ngay trên item đang làm việc
-                    let helperBtnHTML = "";
-                    if (allowAssign || isLabList) {
-                        const isThisSelected = isLabList ? (item.data == assignedLabHelperId) : (item.data == assignedBuilderApprenticeId);
-                        const alreadyUsedToday = isLabList ? hasUsedTodayLab : hasUsedTodayBuilder;
-                        
-                        let btnText = "👷 Gán thợ phụ";
-                        if (isLabList) btnText = "🧪 Gán phụ tá";
-
-                        if (isThisSelected && (isWorking || isLabWorking)) {
-                            btnText = isLabList ? "🧪 Đang phụ tá (x8)" : "👷 Đang làm việc (x8)";
-                        }
-
-                        // Nếu đã chọn rồi hoặc đã dùng hôm nay và đang hồi chiêu thì không cho chọn lại hoặc disabled nếu đã chọn thợ khác
-                        let isDisabled = alreadyUsedToday || helperCooldownSeconds > 0 || (isWorking || isLabWorking);
-                        if (isThisSelected && (isWorking || isLabWorking)) {
-                            isDisabled = false; // Cho phép bấm để giữ hoặc không cần
-                        }
-
-                        helperBtnHTML = `
-                            <button class="btn-item-helper ${isThisSelected && (isWorking || isLabWorking) ? 'active' : ''}" 
-                                onclick="${isLabList ? 'assignLabHelper' : 'assignBuilderApprentice'}(${item.data})" 
-                                ${alreadyUsedToday && !isThisSelected ? 'disabled' : ''}>
-                                ${btnText}
-                            </button>
-                        `;
-                    }
 
                     li.innerHTML = `
                         <div class="item-info">
                             <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
-                            <span class="saved-time">${isAssigned ? savedTimeStr + ' ⚡(Đang x8)' : ''}</span>
-                            ${helperBtnHTML}
                         </div>
                         <div class="timer-box">
                             <span class="timer">Đang tính...</span>
@@ -503,10 +236,10 @@
                 });
             }
 
-            renderList(upcomingData, ui.upcoming, true, false, false);
-            renderList(buildersData, ui.builders, false, true, false);
-            renderList(labData, ui.lab, false, false, true);
-            renderList(petsData, ui.pets, false, false, false);
+            renderList(upcomingData, ui.upcoming, true);
+            renderList(buildersData, ui.builders, false);
+            renderList(labData, ui.lab, false);
+            renderList(petsData, ui.pets, false);
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
@@ -518,201 +251,14 @@
             if (labData.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Tắt đèn...</li>";
             if (petsData.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Trống...</li>";
 
-            updateStatusDisplays();
             startRealtimeCountdown();
         }
-
-        window.assignBuilderApprentice = function(id) {
-            if (hasUsedTodayBuilder || helperCooldownSeconds > 0) {
-                alert("Hôm nay đã chọn rồi hoặc đang trong thời gian hồi chiêu, không thể chọn lại!");
-                return;
-            }
-            assignedBuilderApprenticeId = id;
-            localStorage.setItem('coc_assigned_apprentice', assignedBuilderApprenticeId);
-            
-            // Tự động kích hoạt luôn 1h làm việc khi bấm gán thợ
-            workTimeRemaining = 3600; 
-            helperCooldownSeconds = 23 * 3600; 
-            hasUsedTodayBuilder = true;
-            localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
-            localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-            localStorage.setItem('coc_used_today_builder', 'true');
-            updateAllTimeInputs();
-            renderAllSections();
-        };
-
-        window.assignLabHelper = function(id) {
-            if (hasUsedTodayLab || labCooldownSeconds > 0) {
-                alert("Hôm nay đã chọn phụ tá rồi hoặc đang trong thời gian hồi chiêu, không thể chọn lại!");
-                return;
-            }
-            assignedLabHelperId = id;
-            localStorage.setItem('coc_assigned_lab_helper', assignedLabHelperId);
-            
-            labWorkTimeRemaining = 3600; 
-            labCooldownSeconds = 23 * 3600; 
-            hasUsedTodayLab = true;
-            localStorage.setItem('coc_lab_work_time_remaining', labWorkTimeRemaining);
-            localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-            localStorage.setItem('coc_used_today_lab', 'true');
-            updateAllTimeInputs();
-            renderAllSections();
-        };
-
-        function updateStatusDisplays() {
-            if (workTimeRemaining > 0) {
-                ui.status.textContent = "Đang làm việc (x8)";
-                ui.status.style.color = "#27ae60";
-                ui.btnStartWork.disabled = true;
-                ui.btnStartWork.textContent = `Đang x8 (${Math.floor(workTimeRemaining/60)}m)`;
-                ui.btnCancelWork.style.display = "block";
-            } else if (helperCooldownSeconds > 0) {
-                ui.status.textContent = "Đang hồi chiêu";
-                ui.status.style.color = "#e67e22";
-                ui.btnStartWork.disabled = true;
-                ui.btnStartWork.textContent = "Chờ khả dụng ngày mai";
-                ui.btnCancelWork.style.display = "none";
-            } else {
-                ui.status.textContent = "Khả dụng";
-                ui.status.style.color = "#f1c40f";
-                ui.btnStartWork.disabled = hasUsedTodayBuilder;
-                ui.btnStartWork.textContent = "Bắt đầu làm việc (1h)";
-                ui.btnCancelWork.style.display = "none";
-            }
-
-            if (labWorkTimeRemaining > 0) {
-                ui.labStatus.textContent = "Đang nghiên cứu (x8)";
-                ui.labStatus.style.color = "#27ae60";
-                ui.btnLabStartWork.disabled = true;
-                ui.btnLabStartWork.textContent = `Đang x8 (${Math.floor(labWorkTimeRemaining/60)}m)`;
-                ui.btnLabCancelWork.style.display = "block";
-            } else if (labCooldownSeconds > 0) {
-                ui.labStatus.textContent = "Đang hồi chiêu";
-                ui.labStatus.style.color = "#e67e22";
-                ui.btnLabStartWork.disabled = true;
-                ui.btnLabStartWork.textContent = "Chờ khả dụng ngày mai";
-                ui.btnLabCancelWork.style.display = "none";
-            } else {
-                ui.labStatus.textContent = "Khả dụng";
-                ui.labStatus.style.color = "#f1c40f";
-                ui.btnLabStartWork.disabled = hasUsedTodayLab;
-                ui.btnLabStartWork.textContent = "Bắt đầu nghiên cứu (1h)";
-                ui.btnLabCancelWork.style.display = "none";
-            }
-        }
-
-        ui.btnStartWork.addEventListener('click', () => {
-            if (helperCooldownSeconds <= 0 && workTimeRemaining <= 0 && !hasUsedTodayBuilder) {
-                workTimeRemaining = 3600; 
-                helperCooldownSeconds = 23 * 3600; 
-                hasUsedTodayBuilder = true;
-                localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
-                localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                localStorage.setItem('coc_used_today_builder', 'true');
-                updateAllTimeInputs();
-                renderAllSections();
-            }
-        });
-
-        // Nút Hủy: Thời gian vẫn chạy hết 1h x8 bình thường nhưng cho phép reset trạng thái nếu muốn hoặc giữ nguyên
-        ui.btnCancelWork.addEventListener('click', () => {
-            if (confirm("Bạn có chắc muốn hủy? Thời gian x8 sẽ dừng lại nhưng thời gian đã trừ vẫn giữ nguyên và hôm nay không được chọn lại nữa.")) {
-                workTimeRemaining = 0;
-                localStorage.setItem('coc_work_time_remaining', 0);
-                renderAllSections();
-            }
-        });
-
-        ui.btnLabStartWork.addEventListener('click', () => {
-            if (labCooldownSeconds <= 0 && labWorkTimeRemaining <= 0 && !hasUsedTodayLab) {
-                labWorkTimeRemaining = 3600; 
-                labCooldownSeconds = 23 * 3600; 
-                hasUsedTodayLab = true;
-                localStorage.setItem('coc_lab_work_time_remaining', labWorkTimeRemaining);
-                localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-                localStorage.setItem('coc_used_today_lab', 'true');
-                updateAllTimeInputs();
-                renderAllSections();
-            }
-        });
-
-        ui.btnLabCancelWork.addEventListener('click', () => {
-            if (confirm("Bạn có chắc muốn hủy phụ tá Lab?")) {
-                labWorkTimeRemaining = 0;
-                localStorage.setItem('coc_lab_work_time_remaining', 0);
-                renderAllSections();
-            }
-        });
-
-        function handleCooldownUpdate(hEl, mEl, sEl, isLab = false) {
-            const h = parseInt(hEl.value) || 0;
-            const m = parseInt(mEl.value) || 0;
-            const s = parseInt(sEl.value) || 0;
-            const total = (h * 3600) + (m * 60) + s;
-            
-            if (isLab) {
-                labCooldownSeconds = total;
-                if (total <= 0) { hasUsedTodayLab = false; localStorage.setItem('coc_used_today_lab', 'false'); }
-                localStorage.setItem('coc_lab_cooldown', total);
-            } else {
-                helperCooldownSeconds = total;
-                if (total <= 0) { hasUsedTodayBuilder = false; localStorage.setItem('coc_used_today_builder', 'false'); }
-                localStorage.setItem('coc_helper_cooldown', total);
-            }
-            updateAllTimeInputs();
-            renderAllSections();
-            alert("Đã cập nhật thời gian thành công!");
-        }
-
-        document.getElementById('btn-set-cooldown').addEventListener('click', () => {
-            handleCooldownUpdate(ui.inputHours, ui.inputMins, ui.inputSecs, false);
-        });
-
-        document.getElementById('btn-lab-set-cooldown').addEventListener('click', () => {
-            handleCooldownUpdate(ui.labInputHours, ui.labInputMins, ui.labInputSecs, true);
-        });
 
         function startRealtimeCountdown() {
             if (countdownInterval) clearInterval(countdownInterval);
 
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
-
-                if (workTimeRemaining > 0) {
-                    workTimeRemaining--;
-                    localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
-                    if (workTimeRemaining <= 0) renderAllSections();
-                }
-                if (helperCooldownSeconds > 0) {
-                    helperCooldownSeconds--;
-                    localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                    ui.cooldown.textContent = formatTimeRealtime(helperCooldownSeconds);
-                    if (helperCooldownSeconds <= 0) {
-                        hasUsedTodayBuilder = false; // Sang ngày mới / hết giờ hồi chiêu thì reset lại cho phép chọn
-                        localStorage.setItem('coc_used_today_builder', 'false');
-                    }
-                } else {
-                    ui.cooldown.textContent = "Khả dụng ngay! 🎉";
-                }
-
-                if (labWorkTimeRemaining > 0) {
-                    labWorkTimeRemaining--;
-                    localStorage.setItem('coc_lab_work_time_remaining', labWorkTimeRemaining);
-                    if (labWorkTimeRemaining <= 0) renderAllSections();
-                }
-                if (labCooldownSeconds > 0) {
-                    labCooldownSeconds--;
-                    localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-                    ui.labCooldown.textContent = formatTimeRealtime(labCooldownSeconds);
-                    if (labCooldownSeconds <= 0) {
-                        hasUsedTodayLab = false;
-                        localStorage.setItem('coc_used_today_lab', 'false');
-                    }
-                } else {
-                    ui.labCooldown.textContent = "Khả dụng ngay! 🎉";
-                }
-
-                updateStatusDisplays();
 
                 activeTimers.forEach(task => {
                     if (task.isDone) return;
@@ -785,10 +331,6 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = localStorage.getItem('coc_assigned_apprentice');
-            if(localStorage.getItem('coc_assigned_lab_helper')) assignedLabHelperId = localStorage.getItem('coc_assigned_lab_helper');
-            if(localStorage.getItem('coc_helper_cooldown')) helperCooldownSeconds = parseInt(localStorage.getItem('coc_helper_cooldown'));
-            if(localStorage.getItem('coc_lab_cooldown')) labCooldownSeconds = parseInt(localStorage.getItem('coc_lab_cooldown'));
             loadGameData();
         });
     </script>
