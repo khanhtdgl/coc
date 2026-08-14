@@ -13,9 +13,15 @@
         body { background-color: #1c1c1e; color: #fff; padding: 15px; }
         .container { max-width: 800px; margin: 0 auto; padding-bottom: 40px; }
         
-        header { text-align: center; margin-bottom: 20px; background: #2c2c2e; padding: 20px; border-radius: 12px; }
+        header { text-align: center; margin-bottom: 20px; background: #2c2c2e; padding: 20px; border-radius: 12px; position: relative; }
         header h1 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
         
+        /* Nút mở khung sửa nhanh */
+        .btn-toggle-edit {
+            position: absolute; top: 15px; right: 15px; background: #3a3a3c; color: #f1c40f;
+            border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold;
+        }
+
         h2 { margin-bottom: 15px; color: #3498db; border-bottom: 1px solid #3a3a3c; padding-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
         .card { background: #2c2c2e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         
@@ -35,8 +41,6 @@
         .btn-info { background-color: #27ae60; color: white; flex: 1; }
         .btn-primary { background-color: #2980b9; color: white; flex: 1; }
         .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
-        .btn-cloud-save { background-color: #d35400; color: white; flex: 1; }
-        .btn-cloud-load { background-color: #8e44ad; color: white; flex: 1; }
 
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
@@ -87,20 +91,18 @@
     <div class="container">
         <header>
             <h1>Trạm Nâng Cấp CoC</h1>
-            <p style="color: #8e8e93; font-size: 14px; margin-top: 5px;">Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
+            <p style="color: #8e8e93; font-size: 14px; margin-top: 5px;">Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Đang tải...</span></p>
+            <button id="btn-toggle-edit" class="btn-toggle-edit">⚙️ Sửa JSON</button>
         </header>
 
         <main>
-            <section class="card input-section" id="input-section">
-                <textarea id="json-input" placeholder="Dán mã JSON để xem tiến trình..." rows="3"></textarea>
+            <!-- KHUNG NHẬP/SỬA JSON (Mặc định ẩn, bấm nút "Sửa JSON" trên header để hiện ra) -->
+            <section class="card input-section" id="input-section" style="display: none;">
+                <textarea id="json-input" placeholder="Dán hoặc sửa mã JSON tại đây..." rows="5"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
-                    <button id="btn-process" class="btn-primary">🚀 Chạy</button>
+                    <button id="btn-process" class="btn-primary">🚀 Lưu & Chạy</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
-                </div>
-                <div class="button-group">
-                    <button id="btn-cloud-save" class="btn-cloud-save">☁️ Lưu lên mây</button>
-                    <button id="btn-cloud-load" class="btn-cloud-load">📥 Tải từ mây</button>
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
@@ -139,16 +141,12 @@
         <div class="app-footer">
             <button id="btn-refresh-app" class="btn-refresh-app">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.41L21.5 8"></path></svg>
-                Kiểm tra cập nhật / Làm mới App
+                Tải lại dữ liệu gốc từ GitHub
             </button>
         </div>
     </div>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
-        }
-
         const idDictionary = {
             102000039: "Kẻ hủy diệt", 107000001: "Máy ném bánh", 1000011: "Tháp Pháp sư",
             28000007: "Công tước Rồng", 28000000: "Man di Vương", 107000008: "Tiểu phu",
@@ -198,6 +196,7 @@
             upcoming: document.getElementById('upcoming-list'), builders: document.getElementById('builders-list'), 
             lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
+            section: document.getElementById('input-section'),
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
@@ -207,7 +206,7 @@
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
-            ui.tag.textContent = 'Chưa có dữ liệu'; ui.error.style.display = 'none';
+            ui.tag.textContent = 'Đang tải...'; ui.error.style.display = 'none';
             ui.counts.upcoming.textContent = "0"; ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
             activeTimers = [];
             if (countdownInterval) clearInterval(countdownInterval);
@@ -244,7 +243,6 @@
 
             ui.tag.textContent = data.tag || "Ẩn danh";
             ui.tag.style.color = "#27ae60";
-            document.getElementById('input-section').style.display = 'none';
 
             const jsonTimestamp = data.timestamp || Math.floor(Date.now() / 1000);
 
@@ -382,25 +380,37 @@
             }, 1000);
         }
 
-        document.getElementById('player-tag').parentElement.addEventListener('click', () => {
-            document.getElementById('input-section').style.display = 'block';
-            ui.input.focus();
-        });
+        // Tải dữ liệu: Ưu tiên lấy từ máy đã sửa trước, nếu chưa có thì kéo từ file data.json trên GitHub
+        async function loadGameData() {
+            const savedLocal = localStorage.getItem('saved_custom_coc_json');
+            if (savedLocal) {
+                try {
+                    const data = JSON.parse(savedLocal);
+                    ui.input.value = savedLocal;
+                    processData(data);
+                    return;
+                } catch(e) {}
+            }
 
-        document.getElementById('btn-refresh-app').addEventListener('click', async () => {
-            const btn = document.getElementById('btn-refresh-app');
-            btn.innerHTML = '⏳ Đang tải lại...';
             try {
-                if ('serviceWorker' in navigator) {
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (let registration of registrations) await registration.unregister();
-                }
-                if ('caches' in window) {
-                    const cacheNames = await caches.keys();
-                    await Promise.all(cacheNames.map(cache => caches.delete(cache)));
-                }
-                setTimeout(() => { window.location.href = window.location.pathname + '?t=' + new Date().getTime(); }, 500);
-            } catch (err) { window.location.reload(true); }
+                const response = await fetch('./data.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                ui.input.value = JSON.stringify(data, null, 2);
+                processData(data);
+            } catch (error) {
+                ui.tag.textContent = "Chưa có dữ liệu. Bấm 'Sửa JSON' để thêm!";
+                ui.tag.style.color = "#ff453a";
+            }
+        }
+
+        // Nút ẩn hiện khung sửa JSON
+        document.getElementById('btn-toggle-edit').addEventListener('click', () => {
+            if (ui.section.style.display === 'none') {
+                ui.section.style.display = 'block';
+            } else {
+                ui.section.style.display = 'none';
+            }
         });
 
         function handleJSON(jsonText) {
@@ -409,86 +419,13 @@
             try {
                 const data = JSON.parse(text); 
                 processData(data);
-                localStorage.setItem('saved_coc_json', text);
+                localStorage.setItem('saved_custom_coc_json', text);
+                ui.section.style.display = 'none'; // Ẩn khung đi sau khi bấm lưu thành công
             } catch (error) {
-                ui.error.textContent = "Lỗi mã JSON!";
+                ui.error.textContent = "Lỗi mã JSON! Vui lòng kiểm tra lại.";
                 ui.error.style.display = 'block';
             }
         }
-
-        // HỆ THỐNG LƯU VÀ TẢI TRÊN MÂY MIỄN PHÍ KHÔNG CẦN CẤU HÌNH (Dùng API binshare công khai)
-        const CLOUD_URL = "https://api.jsonbin.io/v3/b/665805e2acd3cb34a8523c9b"; // Kênh lưu trữ dùng chung an toàn
-
-        document.getElementById('btn-cloud-save').addEventListener('click', async () => {
-            const val = ui.input.value.trim();
-            if (!val) { alert("Chưa có mã JSON để lưu!"); return; }
-            const btn = document.getElementById('btn-cloud-save');
-            btn.textContent = "⏳ Đang lưu lên mây...";
-            try {
-                // Lưu thẳng vào không gian lưu trữ chung của ứng dụng
-                const response = await fetch(CLOUD_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$7Xv4v7a3b2c1d0e9f8g7h6i5j4k3l2m1n0o9p8q7r6s5t4u3v2w1x'
-                    },
-                    body: val
-                });
-                if(response.ok) {
-                    localStorage.setItem('saved_coc_json', val);
-                    alert("Đã lưu lên mây thành công! Sang máy khác bấm 'Tải từ mây' là dữ liệu tự nhảy về.");
-                } else {
-                    throw new Error();
-                }
-            } catch(e) {
-                // Fallback dự phòng lưu vào máy nếu lỗi kết nối
-                localStorage.setItem('saved_coc_json', val);
-                alert("Đã lưu vào bộ nhớ máy!");
-            }
-            btn.textContent = "☁️ Lưu lên mây";
-        });
-
-        document.getElementById('btn-cloud-load').addEventListener('click', async () => {
-            const btn = document.getElementById('btn-cloud-load');
-            btn.textContent = "⏳ Đang tải từ mây...";
-            try {
-                const res = await fetch(CLOUD_URL + "/latest", {
-                    headers: {
-                        'X-Master-Key': '$2a$10$7Xv4v7a3b2c1d0e9f8g7h6i5j4k3l2m1n0o9p8q7r6s5t4u3v2w1x'
-                    }
-                });
-                const result = await res.json();
-                if (result && result.record) {
-                    const textData = JSON.stringify(result.record);
-                    ui.input.value = textData;
-                    handleJSON(textData);
-                    alert("Đã tải dữ liệu từ mây thành công!");
-                } else {
-                    throw new Error();
-                }
-            } catch(e) {
-                // Fallback lấy dữ liệu lưu trong máy
-                const local = localStorage.getItem('saved_coc_json');
-                if (local) {
-                    ui.input.value = local;
-                    handleJSON(local);
-                    alert("Đã tải dữ liệu từ bộ nhớ máy!");
-                } else {
-                    alert("Chưa có dữ liệu nào được lưu trên mây!");
-                }
-            }
-            btn.textContent = "📥 Tải từ mây";
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = parseInt(localStorage.getItem('coc_assigned_apprentice'));
-
-            const savedData = localStorage.getItem('saved_coc_json');
-            if (savedData) { 
-                ui.input.value = savedData; 
-                handleJSON(savedData); 
-            }
-        });
 
         document.getElementById('btn-process').addEventListener('click', () => { handleJSON(ui.input.value); });
         
@@ -501,9 +438,18 @@
 
         document.getElementById('btn-clear').addEventListener('click', () => {
             ui.input.value = ''; clearUI();
-            ui.tag.textContent = 'Chưa có dữ liệu'; ui.tag.style.color = '#f1c40f';
-            localStorage.removeItem('saved_coc_json');
-            localStorage.removeItem('coc_assigned_apprentice');
+            localStorage.removeItem('saved_custom_coc_json');
+            ui.tag.textContent = 'Đã xóa dữ liệu';
+        });
+
+        document.getElementById('btn-refresh-app').addEventListener('click', () => {
+            localStorage.removeItem('saved_custom_coc_json');
+            loadGameData();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = parseInt(localStorage.getItem('coc_assigned_apprentice'));
+            loadGameData();
         });
     </script>
 </body>
