@@ -16,7 +16,6 @@
         header { text-align: center; margin-bottom: 20px; background: #2c2c2e; padding: 20px; border-radius: 12px; position: relative; }
         header h1 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
         
-        /* Nút mở khung sửa nhanh */
         .btn-toggle-edit {
             position: absolute; top: 15px; right: 15px; background: #3a3a3c; color: #f1c40f;
             border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold;
@@ -28,6 +27,7 @@
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
         
+        /* Giao diện bảng Thợ xây học việc giống hệt trong game */
         .apprentice-panel { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 10px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .apprentice-title { font-weight: bold; color: #f39c12; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
         .apprentice-desc { font-size: 0.8rem; color: #aaa; }
@@ -54,6 +54,7 @@
 
         .item-left-side { display: flex; align-items: center; gap: 10px; flex: 1; }
         
+        /* Nút chọn thợ học việc nhỏ gọn */
         .btn-assign-app {
             background: #2c2c2e; color: #8e8e93; border: 1px solid #4a4a4c; border-radius: 6px;
             padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
@@ -64,6 +65,7 @@
         .item-info { display: flex; flex-direction: column; gap: 4px; }
         .item-name { font-weight: 600; font-size: 0.95rem; color: #fff; }
 
+        /* Dòng chữ "Thời gian tiết kiệm" màu cam y hệt game */
         .saved-time { font-size: 0.75rem; color: #e67e22; font-weight: bold; display: none; }
         .has-apprentice .saved-time { display: inline-block; }
 
@@ -96,7 +98,6 @@
         </header>
 
         <main>
-            <!-- KHUNG NHẬP/SỬA JSON (Mặc định ẩn, bấm nút "Sửa JSON" trên header để hiện ra) -->
             <section class="card input-section" id="input-section" style="display: none;">
                 <textarea id="json-input" placeholder="Dán hoặc sửa mã JSON tại đây..." rows="5"></textarea>
                 <div class="button-group">
@@ -107,6 +108,7 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
+            <!-- BẢNG MÔ PHỎNG THỢ XÂY HỌC VIỆC CẤP 8 -->
             <div class="apprentice-panel">
                 <div>
                     <div class="apprentice-title">👷 Thợ xây học việc cấp 8</div>
@@ -141,7 +143,7 @@
         <div class="app-footer">
             <button id="btn-refresh-app" class="btn-refresh-app">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.41L21.5 8"></path></svg>
-                Tải lại dữ liệu gốc từ GitHub
+                Tải lại dữ liệu từ GitHub
             </button>
         </div>
     </div>
@@ -222,7 +224,7 @@
         }
 
         function calculateAdjustedTime(timerSeconds) {
-            const ratio = 16 / 24; 
+            const ratio = 16 / 24; // Cấp 8 giảm 8h mỗi ngày
             return Math.floor(timerSeconds * ratio);
         }
 
@@ -380,7 +382,6 @@
             }, 1000);
         }
 
-        // Tải dữ liệu: Ưu tiên lấy từ máy đã sửa trước, nếu chưa có thì kéo từ file data.json trên GitHub
         async function loadGameData() {
             const savedLocal = localStorage.getItem('saved_custom_coc_json');
             if (savedLocal) {
@@ -404,7 +405,6 @@
             }
         }
 
-        // Nút ẩn hiện khung sửa JSON
         document.getElementById('btn-toggle-edit').addEventListener('click', () => {
             if (ui.section.style.display === 'none') {
                 ui.section.style.display = 'block';
@@ -420,7 +420,7 @@
                 const data = JSON.parse(text); 
                 processData(data);
                 localStorage.setItem('saved_custom_coc_json', text);
-                ui.section.style.display = 'none'; // Ẩn khung đi sau khi bấm lưu thành công
+                ui.section.style.display = 'none';
             } catch (error) {
                 ui.error.textContent = "Lỗi mã JSON! Vui lòng kiểm tra lại.";
                 ui.error.style.display = 'block';
