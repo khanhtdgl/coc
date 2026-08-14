@@ -101,7 +101,7 @@
         </div>
 
         <div class="row g-4">
-            <!-- Thợ xây (Đúng 6 thợ xây công trình/tướng) -->
+            <!-- Thợ xây -->
             <div class="col-lg-4">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
@@ -145,7 +145,6 @@
     <script>
         let cocData = null;
 
-        // Từ điển tên định danh chính xác theo ID trong game của bạn
         const nameMapping = {
             28000000: "Man di Vương",
             28000007: "Thợ săn Tường",
@@ -154,7 +153,6 @@
             1000011: "Tháp Pháp sư",
             1000048: "Công tước Rồng",
             1000043: "Tiêu phu",
-            4000082: "Nghiên cứu chung (Lab)",
             73000017: "Quạ tham lam"
         };
 
@@ -203,7 +201,6 @@
 
             let builderItems = [];
 
-            // 1. Thợ xây: Chỉ lấy Heroes (trừ ID 28000007 là thợ săn tường ở Lab), Guardians và Buildings chính
             if (cocData.heroes) {
                 cocData.heroes.forEach(h => {
                     if (h.timer && h.timer > 0 && h.data !== 28000007) {
@@ -215,7 +212,7 @@
             if (cocData.guardians) {
                 cocData.guardians.forEach(g => {
                     if (g.timer && g.timer > 0) {
-                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: g.lvl, timer: g.timer });
+                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: h.lvl, timer: g.timer });
                     }
                 });
             }
@@ -236,7 +233,6 @@
                 });
             }
 
-            // Sắp xếp thời gian ngắn nhất lên trên
             builderItems.sort((a, b) => a.timer - b.timer);
 
             const buildersContainer = document.getElementById('builders-list');
@@ -259,7 +255,6 @@
                 });
             }
 
-            // 2. Phòng Thí Nghiệm (Bao gồm Thợ săn tường ID 28000007 và các đơn vị units trong Lab)
             let labItems = [];
             
             if (cocData.heroes) {
@@ -272,7 +267,7 @@
 
             if (cocData.units) {
                 cocData.units.forEach(u => {
-                    if (u.timer && u.timer > 0) {
+                    if (u.timer && u.timer > 0 && u.data !== 4000082) {
                         labItems.push({ name: nameMapping[u.data] || `Nghiên cứu (ID: ${u.data})`, level: u.lvl, timer: u.timer });
                     }
                 });
@@ -298,7 +293,6 @@
                 });
             }
 
-            // 3. Chuồng Linh Thú (Pets)
             let petItems = [];
             if (cocData.pets) {
                 cocData.pets.forEach(p => {
