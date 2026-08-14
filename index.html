@@ -127,7 +127,7 @@
                 <div class="helper-top">
                     <div class="helper-title">
                         <h3>👷 Thợ Xây Học Việc (Cấp 8)</h3>
-                        <p>Tăng tốc x8 trong 1 giờ làm việc, hồi chiêu 23 giờ</p>
+                        <p>Tăng tốc x8 trong 1 giờ làm việc, hồi chiêu chung</p>
                     </div>
                     <div class="helper-stats">
                         <div class="helper-box">
@@ -135,7 +135,7 @@
                             <span class="value" id="builder-status">Khả dụng</span>
                         </div>
                         <div class="helper-box">
-                            <span class="label">Hồi chiêu</span>
+                            <span class="label">Hồi chiêu chung</span>
                             <span class="value" id="builder-cooldown">00:00:00</span>
                         </div>
                     </div>
@@ -143,13 +143,13 @@
                 
                 <div class="helper-row">
                     <div class="time-inputs">
-                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian:</label>
-                        <input type="number" id="b-h" placeholder="Giờ" min="0"><span>h</span>
-                        <input type="number" id="b-m" placeholder="Phút" min="0" max="59"><span>m</span>
-                        <input type="number" id="b-s" placeholder="Giây" min="0" max="59"><span>s</span>
-                        <button id="b-set-btn" class="btn-action" style="background: #2980b9; padding: 4px 8px; margin-left: 5px;">Đặt</button>
+                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian chung:</label>
+                        <input type="number" id="shared-h" placeholder="Giờ" min="0"><span>h</span>
+                        <input type="number" id="shared-m" placeholder="Phút" min="0" max="59"><span>m</span>
+                        <input type="number" id="shared-s" placeholder="Giây" min="0" max="59"><span>s</span>
+                        <button id="shared-set-btn" class="btn-action" style="background: #2980b9; padding: 4px 8px; margin-left: 5px;">Đặt chung</button>
                     </div>
-                    <button id="b-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset ngày mới</button>
+                    <button id="shared-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset chung</button>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@
                 <div class="helper-top">
                     <div class="helper-title">
                         <h3>🧪 Phụ Tá Phòng Thí Nghiệm (Cấp 8)</h3>
-                        <p>Tăng tốc x8 trong 1 giờ nghiên cứu, hồi chiêu 23 giờ</p>
+                        <p>Tăng tốc x8 trong 1 giờ nghiên cứu, hồi chiêu chung</p>
                     </div>
                     <div class="helper-stats">
                         <div class="helper-box" style="border-color:#af7ac5;">
@@ -166,21 +166,10 @@
                             <span class="value" id="lab-status" style="color:#af7ac5;">Khả dụng</span>
                         </div>
                         <div class="helper-box" style="border-color:#af7ac5;">
-                            <span class="label">Hồi chiêu</span>
+                            <span class="label">Hồi chiêu chung</span>
                             <span class="value" id="lab-cooldown" style="color:#af7ac5;">00:00:00</span>
                         </div>
                     </div>
-                </div>
-                
-                <div class="helper-row">
-                    <div class="time-inputs">
-                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian:</label>
-                        <input type="number" id="l-h" placeholder="Giờ" min="0"><span>h</span>
-                        <input type="number" id="l-m" placeholder="Phút" min="0" max="59"><span>m</span>
-                        <input type="number" id="l-s" placeholder="Giây" min="0" max="59"><span>s</span>
-                        <button id="l-set-btn" class="btn-action" style="background: #8e44ad; padding: 4px 8px; margin-left: 5px;">Đặt</button>
-                    </div>
-                    <button id="l-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset ngày mới</button>
                 </div>
             </div>
 
@@ -255,11 +244,12 @@
             
             builderStatus: document.getElementById('builder-status'),
             builderCooldown: document.getElementById('builder-cooldown'),
-            bH: document.getElementById('b-h'), bM: document.getElementById('b-m'), bS: document.getElementById('b-s'),
-
             labStatus: document.getElementById('lab-status'),
             labCooldown: document.getElementById('lab-cooldown'),
-            lH: document.getElementById('l-h'), lM: document.getElementById('l-m'), lS: document.getElementById('l-s'),
+
+            sH: document.getElementById('shared-h'), 
+            sM: document.getElementById('shared-m'), 
+            sS: document.getElementById('shared-s'),
 
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
@@ -267,11 +257,11 @@
         let activeTimers = []; 
         let countdownInterval = null;
 
-        let builderCd = 0;       
+        // Thời gian chung cho cả 2 thợ (đồng bộ hoàn toàn)
+        let sharedCd = 0;       
         let builderWorkRem = 0;  
         let selectedBuilderId = null; 
 
-        let labCd = 0;
         let labWorkRem = 0;
         let selectedLabId = null;
 
@@ -301,11 +291,10 @@
         function processData(data) {
             globalGameData = data;
             
-            if (localStorage.getItem('coc_b_cd')) builderCd = parseInt(localStorage.getItem('coc_b_cd'));
+            if (localStorage.getItem('coc_shared_cd')) sharedCd = parseInt(localStorage.getItem('coc_shared_cd'));
             if (localStorage.getItem('coc_b_work')) builderWorkRem = parseInt(localStorage.getItem('coc_b_work'));
             if (localStorage.getItem('coc_b_sel')) selectedBuilderId = localStorage.getItem('coc_b_sel');
 
-            if (localStorage.getItem('coc_l_cd')) labCd = parseInt(localStorage.getItem('coc_l_cd'));
             if (localStorage.getItem('coc_l_work')) labWorkRem = parseInt(localStorage.getItem('coc_l_work'));
             if (localStorage.getItem('coc_l_sel')) selectedLabId = localStorage.getItem('coc_l_sel');
 
@@ -442,105 +431,89 @@
         }
 
         window.selectBuilderItem = function(id) {
-            if (builderCd > 0 && builderWorkRem <= 0) {
-                alert("Thợ xây học việc đang trong thời gian hồi chiêu!");
+            if (sharedCd > 0 && builderWorkRem <= 0) {
+                alert("Lều hỗ trợ đang trong thời gian hồi chiêu chung!");
                 return;
             }
             selectedBuilderId = id;
             localStorage.setItem('coc_b_sel', selectedBuilderId);
 
-            if (builderWorkRem <= 0 && builderCd <= 0) {
+            if (builderWorkRem <= 0 && sharedCd <= 0) {
                 builderWorkRem = 3600; 
-                builderCd = 23 * 3600;  
+                sharedCd = 23 * 3600;  
                 localStorage.setItem('coc_b_work', builderWorkRem);
-                localStorage.setItem('coc_b_cd', builderCd);
+                localStorage.setItem('coc_shared_cd', sharedCd);
             }
             renderAllSections();
         };
 
         window.selectLabItem = function(id) {
-            if (labCd > 0 && labWorkRem <= 0) {
-                alert("Phụ tá Lab đang trong thời gian hồi chiêu!");
+            if (sharedCd > 0 && labWorkRem <= 0) {
+                alert("Lều hỗ trợ đang trong thời gian hồi chiêu chung!");
                 return;
             }
             selectedLabId = id;
             localStorage.setItem('coc_l_sel', selectedLabId);
 
-            if (labWorkRem <= 0 && labCd <= 0) {
+            if (labWorkRem <= 0 && sharedCd <= 0) {
                 labWorkRem = 3600; 
-                labCd = 23 * 3600;  
+                sharedCd = 23 * 3600;  
                 localStorage.setItem('coc_l_work', labWorkRem);
-                localStorage.setItem('coc_l_cd', labCd);
+                localStorage.setItem('coc_shared_cd', sharedCd);
             }
             renderAllSections();
         };
 
         function updateStatusAndInputs() {
+            // Thợ xây
             if (builderWorkRem > 0) {
                 ui.builderStatus.textContent = "Đang làm việc (x8)";
                 ui.builderStatus.style.color = "#27ae60";
-            } else if (builderCd > 0) {
+            } else if (sharedCd > 0) {
                 ui.builderStatus.textContent = "Đang hồi chiêu";
                 ui.builderStatus.style.color = "#e67e22";
             } else {
                 ui.builderStatus.textContent = "Khả dụng";
                 ui.builderStatus.style.color = "#f1c40f";
             }
-            ui.builderCooldown.textContent = formatTimeRealtime(builderCd > 0 ? builderCd : 0);
 
-            ui.bH.value = Math.floor(builderCd / 3600);
-            ui.bM.value = Math.floor((builderCd % 3600) / 60);
-            ui.bS.value = builderCd % 60;
-
+            // Phụ tá Lab
             if (labWorkRem > 0) {
                 ui.labStatus.textContent = "Đang nghiên cứu (x8)";
                 ui.labStatus.style.color = "#27ae60";
-            } else if (labCd > 0) {
+            } else if (sharedCd > 0) {
                 ui.labStatus.textContent = "Đang hồi chiêu";
                 ui.labStatus.style.color = "#e67e22";
             } else {
                 ui.labStatus.textContent = "Khả dụng";
                 ui.labStatus.style.color = "#f1c40f";
             }
-            ui.labCooldown.textContent = formatTimeRealtime(labCd > 0 ? labCd : 0);
 
-            ui.lH.value = Math.floor(labCd / 3600);
-            ui.lM.value = Math.floor((labCd % 3600) / 60);
-            ui.lS.value = labCd % 60;
+            const timeStr = formatTimeRealtime(sharedCd > 0 ? sharedCd : 0);
+            ui.builderCooldown.textContent = timeStr;
+            ui.labCooldown.textContent = timeStr;
+
+            ui.sH.value = Math.floor(sharedCd / 3600);
+            ui.sM.value = Math.floor((sharedCd % 3600) / 60);
+            ui.sS.value = sharedCd % 60;
         }
 
-        document.getElementById('b-set-btn').addEventListener('click', () => {
-            const h = parseInt(ui.bH.value) || 0;
-            const m = parseInt(ui.bM.value) || 0;
-            const s = parseInt(ui.bS.value) || 0;
-            builderCd = (h * 3600) + (m * 60) + s;
-            localStorage.setItem('coc_b_cd', builderCd);
+        document.getElementById('shared-set-btn').addEventListener('click', () => {
+            const h = parseInt(ui.sH.value) || 0;
+            const m = parseInt(ui.sM.value) || 0;
+            const s = parseInt(ui.sS.value) || 0;
+            sharedCd = (h * 3600) + (m * 60) + s;
+            localStorage.setItem('coc_shared_cd', sharedCd);
             renderAllSections();
-            alert("Đã cập nhật hồi chiêu Thợ Xây!");
+            alert("Đã cập nhật thời gian hồi chiêu chung cho cả 2 thợ!");
         });
 
-        document.getElementById('b-reset-btn').addEventListener('click', () => {
-            builderCd = 0;
+        document.getElementById('shared-reset-btn').addEventListener('click', () => {
+            sharedCd = 0;
             builderWorkRem = 0;
-            localStorage.setItem('coc_b_cd', 0);
-            localStorage.setItem('coc_b_work', 0);
-            renderAllSections();
-        });
-
-        document.getElementById('l-set-btn').addEventListener('click', () => {
-            const h = parseInt(ui.lH.value) || 0;
-            const m = parseInt(ui.lM.value) || 0;
-            const s = parseInt(ui.lS.value) || 0;
-            labCd = (h * 3600) + (m * 60) + s;
-            localStorage.setItem('coc_l_cd', labCd);
-            renderAllSections();
-            alert("Đã cập nhật hồi chiêu Phụ Tá Lab!");
-        });
-
-        document.getElementById('l-reset-btn').addEventListener('click', () => {
-            labCd = 0;
             labWorkRem = 0;
-            localStorage.setItem('coc_l_cd', 0);
+            localStorage.setItem('coc_shared_cd', 0);
+            localStorage.setItem('coc_b_work', 0);
             localStorage.setItem('coc_l_work', 0);
             renderAllSections();
         });
@@ -556,21 +529,22 @@
                     localStorage.setItem('coc_b_work', builderWorkRem);
                     if (builderWorkRem <= 0) renderAllSections();
                 }
-                if (builderCd > 0) {
-                    builderCd--;
-                    localStorage.setItem('coc_b_cd', builderCd);
-                    ui.builderCooldown.textContent = formatTimeRealtime(builderCd);
-                }
 
                 if (labWorkRem > 0) {
                     labWorkRem--;
                     localStorage.setItem('coc_l_work', labWorkRem);
                     if (labWorkRem <= 0) renderAllSections();
                 }
-                if (labCd > 0) {
-                    labCd--;
-                    localStorage.setItem('coc_l_cd', labCd);
-                    ui.labCooldown.textContent = formatTimeRealtime(labCd);
+
+                if (sharedCd > 0) {
+                    sharedCd--;
+                    localStorage.setItem('coc_shared_cd', sharedCd);
+                    const tStr = formatTimeRealtime(sharedCd);
+                    ui.builderCooldown.textContent = tStr;
+                    ui.labCooldown.textContent = tStr;
+                } else {
+                    ui.builderCooldown.textContent = "Sẵn sàng! 🎉";
+                    ui.labCooldown.textContent = "Sẵn sàng! 🎉";
                 }
 
                 updateStatusAndInputs();
