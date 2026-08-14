@@ -19,6 +19,10 @@
         h2 { margin-bottom: 15px; color: #3498db; border-bottom: 1px solid #3a3a3c; padding-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
         .card { background: #2c2c2e; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         
+        /* Style riêng cho bảng 24h */
+        .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
+        .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
+        
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
         
@@ -32,6 +36,7 @@
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
         
+        #upcoming-list li { border-left-color: #e67e22; }
         #builders-list li { border-left-color: #f39c12; }
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
@@ -43,7 +48,6 @@
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
 
-        /* NÚT LÀM MỚI APP ĐÚNG CHUẨN IOS */
         .app-footer { margin-top: 30px; margin-bottom: 20px; text-align: center; }
         .btn-refresh-app {
             background: transparent; color: #8e8e93;
@@ -72,6 +76,12 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
+            <!-- BẢNG BÁO CÁO 24H (MỚI) -->
+            <section class="card card-hot">
+                <h2>🔥 Xong trong 24h tới <span id="upcoming-count" class="badge" style="background:#e67e22;">0</span></h2>
+                <ul id="upcoming-list" class="item-list"></ul>
+            </section>
+
             <section class="card">
                 <h2>👷 Thợ Xây <span id="builder-count" class="badge">0</span></h2>
                 <ul id="builders-list" class="item-list"></ul>
@@ -88,7 +98,6 @@
             </section>
         </main>
 
-        <!-- ĐÂY LÀ NÚT CẬP NHẬT WEB APP BẠN CẦN -->
         <div class="app-footer">
             <button id="btn-refresh-app" class="btn-refresh-app">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.41L21.5 8"></path></svg>
@@ -98,11 +107,8 @@
     </div>
 
     <script>
-        // Cài đặt Service Worker cho tính năng Offline
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
         }
 
         const idDictionary = {
@@ -136,18 +142,19 @@
         }
 
         const ui = {
-            builders: document.getElementById('builders-list'), lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
+            upcoming: document.getElementById('upcoming-list'), builders: document.getElementById('builders-list'), 
+            lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
-            counts: { builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
+            counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
         let activeTimers = []; 
         let countdownInterval = null;
 
         function clearUI() {
-            ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
+            ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
             ui.tag.textContent = 'Đang chờ...'; ui.error.style.display = 'none';
-            ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
+            ui.counts.upcoming.textContent = "0"; ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
             activeTimers = [];
             if (countdownInterval) clearInterval(countdownInterval);
         }
@@ -168,8 +175,6 @@
             }
             ui.tag.textContent = data.tag || "Ẩn danh";
             ui.tag.style.color = "#27ae60";
-
-            // Giấu ô nhập JSON đi cho giống App, khi nào cần thì chạm vào Tag để mở ra
             document.getElementById('input-section').style.display = 'none';
 
             const jsonTimestamp = data.timestamp || Math.floor(Date.now() / 1000);
@@ -184,29 +189,47 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            function renderList(dataArray, targetUI) {
+            // TÍNH NĂNG MỚI: Sắp xếp thời gian ngắn nhất lên đầu
+            buildersData.sort((a, b) => a.timer - b.timer);
+            labData.sort((a, b) => a.timer - b.timer);
+            petsData.sort((a, b) => a.timer - b.timer);
+
+            // TÍNH NĂNG MỚI: Lọc các mục xong trong 24h (86400 giây)
+            let allData = [...buildersData, ...labData, ...petsData];
+            let upcomingData = allData.filter(item => item.timer <= 86400).sort((a, b) => a.timer - b.timer);
+
+            function renderList(dataArray, targetUI, skipNotify = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
-                    
                     li.innerHTML = `<span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> <span class="timer">Đang tính...</span>`;
                     targetUI.appendChild(li);
 
-                    activeTimers.push({ name: itemName, endTime: jsonTimestamp + item.timer, domElement: li.querySelector('.timer'), isNotified: false });
+                    // skipNotify giúp tránh việc thông báo đẩy kêu 2 lần khi 1 mục nằm ở 2 bảng
+                    activeTimers.push({ 
+                        name: itemName, 
+                        endTime: jsonTimestamp + item.timer, 
+                        domElement: li.querySelector('.timer'), 
+                        isNotified: skipNotify 
+                    });
                 });
             }
 
-            renderList(buildersData, ui.builders);
-            renderList(labData, ui.lab);
-            renderList(petsData, ui.pets);
+            // Render dữ liệu ra màn hình
+            renderList(upcomingData, ui.upcoming, true); // Bảng 24h không kích hoạt chuông (vì chuông được kích hoạt ở bảng chính bên dưới)
+            renderList(buildersData, ui.builders, false);
+            renderList(labData, ui.lab, false);
+            renderList(petsData, ui.pets, false);
 
-            ui.counts.builders.textContent = ui.builders.children.length;
-            ui.counts.lab.textContent = ui.lab.children.length;
-            ui.counts.pets.textContent = ui.pets.children.length;
+            ui.counts.upcoming.textContent = upcomingData.length;
+            ui.counts.builders.textContent = buildersData.length;
+            ui.counts.lab.textContent = labData.length;
+            ui.counts.pets.textContent = petsData.length;
 
-            if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây rảnh rỗi...</li>";
-            if (ui.lab.children.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Tắt đèn...</li>";
-            if (ui.pets.children.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Trống...</li>";
+            if (upcomingData.length === 0) ui.upcoming.innerHTML = "<li class='empty-msg'>Thoải mái đi, không có gì xong trong 24h tới...</li>";
+            if (buildersData.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây rảnh rỗi...</li>";
+            if (labData.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Tắt đèn...</li>";
+            if (petsData.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Trống...</li>";
 
             startRealtimeCountdown();
         }
@@ -223,48 +246,33 @@
                         task.domElement.textContent = "Xong! 🎉";
                         task.domElement.classList.add('done');
                         task.isNotified = true;
+                        if ("Notification" in window && Notification.permission === "granted") {
+                            new Notification("Hoàn thành nâng cấp!", { body: `${task.name} đã nâng cấp xong!` });
+                        }
                     }
                 });
             }, 1000);
         }
 
-        // Chạm vào phần Tag để mở lại ô dán JSON
         document.getElementById('player-tag').parentElement.addEventListener('click', () => {
             document.getElementById('input-section').style.display = 'block';
             ui.input.focus();
         });
 
-        // ==========================================
-        // TÍNH NĂNG ÉP CẬP NHẬT TRANG WEB (LÀM MỚI APP)
-        // ==========================================
         document.getElementById('btn-refresh-app').addEventListener('click', async () => {
             const btn = document.getElementById('btn-refresh-app');
-            btn.innerHTML = '⏳ Đang xóa dữ liệu cũ và tải bản mới...';
-            
+            btn.innerHTML = '⏳ Đang tải lại...';
             try {
-                // 1. Gỡ bỏ toàn bộ Service Worker (Kẻ thù số 1 của việc cập nhật web)
                 if ('serviceWorker' in navigator) {
                     const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (let registration of registrations) {
-                        await registration.unregister();
-                    }
+                    for (let registration of registrations) await registration.unregister();
                 }
-                
-                // 2. Xóa sạch sẽ toàn bộ Cache của trình duyệt
                 if ('caches' in window) {
                     const cacheNames = await caches.keys();
                     await Promise.all(cacheNames.map(cache => caches.delete(cache)));
                 }
-
-                // 3. Tải lại trang với một tham số thời gian để đánh lừa trình duyệt tải file mới 100%
-                setTimeout(() => {
-                    window.location.href = window.location.pathname + '?t=' + new Date().getTime();
-                }, 500);
-
-            } catch (err) {
-                // Nếu lỗi, sử dụng cách tải lại truyền thống
-                window.location.reload(true);
-            }
+                setTimeout(() => { window.location.href = window.location.pathname + '?t=' + new Date().getTime(); }, 500);
+            } catch (err) { window.location.reload(true); }
         });
 
         function handleJSON(jsonText) {
@@ -282,19 +290,14 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedData = localStorage.getItem('saved_coc_json');
-            if (savedData) {
-                ui.input.value = savedData;
-                handleJSON(savedData);
-            }
+            if (savedData) { ui.input.value = savedData; handleJSON(savedData); }
         });
 
         document.getElementById('btn-process').addEventListener('click', () => { handleJSON(ui.input.value); });
         
         document.getElementById('btn-paste').addEventListener('click', async () => {
-            try {
-                const text = await navigator.clipboard.readText(); 
-                ui.input.value = text; handleJSON(text);
-            } catch (err) { alert("Vui lòng dán thủ công!"); }
+            try { const text = await navigator.clipboard.readText(); ui.input.value = text; handleJSON(text); } 
+            catch (err) { alert("Vui lòng dán thủ công!"); }
         });
 
         ui.input.addEventListener('paste', (e) => { setTimeout(() => { handleJSON(e.target.value); }, 100); });
