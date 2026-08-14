@@ -11,7 +11,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f7f6; color: #333; padding: 15px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 30px; }
         
         header { text-align: center; margin-bottom: 20px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         header h1 { font-size: 1.5rem; margin-bottom: 5px; }
@@ -45,20 +45,18 @@
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
 
-        /* THANH THÔNG BÁO CẬP NHẬT APP */
-        #app-update-banner {
-            display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: #27ae60; color: white; padding: 12px 24px; border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); z-index: 9999; font-weight: bold;
-            cursor: pointer; text-align: center; white-space: nowrap; animation: pop 0.5s ease-out;
+        /* KIỂU DÁNG NÚT LÀM MỚI APP GIỐNG TRONG ẢNH */
+        .app-footer { margin-top: 30px; text-align: center; }
+        .btn-refresh-app {
+            background: transparent; color: #7f8c8d;
+            border: 1px dashed #bdc3c7; border-radius: 8px;
+            padding: 12px 20px; font-size: 14px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
         }
-        @keyframes pop { 0% { transform: translate(-50%, 50px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
+        .btn-refresh-app:active { background: #ecf0f1; }
     </style>
 </head>
 <body>
-    <!-- NÚT BẤM CẬP NHẬT PHIÊN BẢN (ẨN) -->
-    <div id="app-update-banner">✨ Có bản cập nhật Web mới! Bấm để tải</div>
-
     <div class="container">
         <header>
             <h1>Trạm Nâng Cấp Làng Chính</h1>
@@ -93,43 +91,25 @@
                 <ul id="pets-list" class="item-list"></ul>
             </section>
         </main>
+
+        <!-- NÚT KIỂM TRA CẬP NHẬT Ở DƯỚI CÙNG -->
+        <div class="app-footer">
+            <button id="btn-refresh-app" class="btn-refresh-app">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.13 15.57a10 10 0 1 0 3.43-11.41L21.5 8"></path></svg>
+                Kiểm tra cập nhật / Làm mới App
+            </button>
+        </div>
     </div>
 
     <script>
-        // --- HỆ THỐNG KIỂM TRA PHIÊN BẢN (APP UPDATE) ---
-        let newWorker;
-        const updateBanner = document.getElementById('app-update-banner');
-
+        // ĐĂNG KÝ APP OFFLINE
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                reg.addEventListener('updatefound', () => {
-                    newWorker = reg.installing;
-                    newWorker.addEventListener('statechange', () => {
-                        // Nếu có bản cài mới trên Github, hiện cái nút nổi màu xanh lên
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            updateBanner.style.display = 'block';
-                        }
-                    });
-                });
-            });
-
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload(); // Tự động load lại trang khi bấm cập nhật
-                    refreshing = true;
-                }
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
             });
         }
 
-        // Khi người dùng bấm vào thanh thông báo màu xanh dưới cùng
-        updateBanner.addEventListener('click', () => {
-            if (newWorker) {
-                newWorker.postMessage('SKIP_WAITING');
-            }
-        });
-
-        // --- CÁC HÀM XỬ LÝ DỮ LIỆU COC (GIỮ NGUYÊN NHƯ CŨ) ---
+        // TỪ ĐIỂN
         const idDictionary = {
             102000039: "Kẻ hủy diệt", 107000001: "Máy ném bánh", 1000011: "Tháp Pháp sư",
             28000007: "Công tước Rồng", 28000000: "Man di Vương", 107000008: "Tiểu phu",
@@ -257,11 +237,10 @@
             }, 1000);
         }
 
+        // CÁC NÚT BẤM CƠ BẢN
         document.getElementById('btn-show-update').addEventListener('click', () => {
-            ui.inputSection.style.display = 'block';
-            ui.btnUpdate.style.display = 'none';
-            ui.input.value = ''; 
-            ui.input.focus();
+            ui.inputSection.style.display = 'block'; ui.btnUpdate.style.display = 'none';
+            ui.input.value = ''; ui.input.focus();
         });
 
         document.getElementById('btn-notify').addEventListener('click', () => {
@@ -269,6 +248,33 @@
             Notification.requestPermission().then(permission => {
                 if (permission === "granted") alert("✅ Đã bật thông báo!");
             });
+        });
+
+        // XỬ LÝ NÚT "KIỂM TRA CẬP NHẬT / LÀM MỚI APP"
+        document.getElementById('btn-refresh-app').addEventListener('click', () => {
+            const btn = document.getElementById('btn-refresh-app');
+            btn.innerHTML = '⏳ Đang tải lại...'; // Đổi chữ để báo hiệu đang chạy
+            
+            // 1. Yêu cầu Service Worker kiểm tra bản cập nhật
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.update(); 
+                    }
+                });
+                
+                // 2. Dọn dẹp toàn bộ bộ nhớ Cache Offline để ép tải file mới từ Github
+                caches.keys().then((keyList) => {
+                    return Promise.all(keyList.map((key) => {
+                        return caches.delete(key);
+                    }));
+                }).then(() => {
+                    // 3. Tải lại trang hoàn toàn
+                    window.location.reload(true);
+                });
+            } else {
+                window.location.reload(true);
+            }
         });
 
         function handleJSON(jsonText) {
