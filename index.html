@@ -16,14 +16,8 @@
         header { text-align: center; margin-bottom: 20px; background: #2c2c2e; padding: 20px; border-radius: 12px; position: relative; }
         header h1 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
         
-        /* Nhóm nút nhỏ gọn trên góc header */
-        .header-buttons {
-            position: absolute; top: 15px; right: 15px; display: flex; gap: 5px;
-        }
-        .btn-header-small {
-            background: #3a3a3c; color: #f1c40f; border: none; padding: 6px 10px; 
-            border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold;
-        }
+        .header-buttons { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
+        .btn-header-small { background: #3a3a3c; color: #f1c40f; border: none; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold; }
         .btn-header-small.btn-reload { color: #3498db; }
 
         h2 { margin-bottom: 15px; color: #3498db; border-bottom: 1px solid #3a3a3c; padding-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
@@ -32,9 +26,15 @@
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
         
-        .apprentice-panel { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 10px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .apprentice-title { font-weight: bold; color: #f39c12; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
-        .apprentice-desc { font-size: 0.8rem; color: #aaa; }
+        /* Bảng thợ học việc chuẩn game */
+        .apprentice-card { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .apprentice-left h3 { color: #f39c12; font-size: 1.1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .apprentice-left p { font-size: 0.85rem; color: #bbb; }
+        .apprentice-right { display: flex; gap: 10px; align-items: center; }
+        .apprentice-box { background: #2c2c2e; border: 1px solid #4a4a4c; padding: 8px 12px; border-radius: 8px; text-align: center; }
+        .apprentice-box .label { font-size: 0.7rem; color: #aaa; display: block; }
+        .apprentice-box .value { font-size: 0.95rem; font-weight: bold; color: #fff; }
+        .apprentice-box .value.highlight { color: #f1c40f; }
 
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
@@ -90,7 +90,6 @@
             <h1>Trạm Nâng Cấp CoC</h1>
             <p style="color: #8e8e93; font-size: 14px; margin-top: 5px;">Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Đang tải...</span></p>
             
-            <!-- Hai nút nhỏ gọn ở góc trên bên phải -->
             <div class="header-buttons">
                 <button id="btn-reload-github" class="btn-header-small btn-reload" title="Tải lại từ GitHub">🔄 Lấy từ GitHub</button>
                 <button id="btn-toggle-edit" class="btn-header-small">⚙️ Sửa JSON</button>
@@ -108,13 +107,21 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
-            <div class="apprentice-panel">
-                <div>
-                    <div class="apprentice-title">👷 Thợ xây học việc cấp 8</div>
-                    <div class="apprentice-desc">Giảm 8 giờ làm việc mỗi ngày cho 1 thợ được chọn</div>
+            <!-- BẢNG THỢ XÂY HỌC VIỆC RIÊNG BIỆT -->
+            <div class="apprentice-card">
+                <div class="apprentice-left">
+                    <h3>👷 Thợ xây học việc cấp 8</h3>
+                    <p>Giảm 8 giờ làm việc mỗi ngày cho 1 thợ được chọn</p>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 0.8rem; color: #f39c12; font-weight: bold;">Tốc độ: x8</div>
+                <div class="apprentice-right">
+                    <div class="apprentice-box">
+                        <span class="label">Tốc độ làm việc</span>
+                        <span class="value" style="color: #e67e22;">x8</span>
+                    </div>
+                    <div class="apprentice-box">
+                        <span class="label">Khả dụng sau</span>
+                        <span class="value highlight" id="cooldown-timer">Đang tính...</span>
+                    </div>
                 </div>
             </div>
 
@@ -157,7 +164,7 @@
         }
 
         function formatTimeRealtime(seconds) {
-            if (seconds <= 0) return "Xong! 🎉";
+            if (seconds <= 0) return "Khả dụng ngay! 🎉";
             const days = Math.floor(seconds / (3600 * 24));
             const hours = Math.floor((seconds % (3600 * 24)) / 3600);
             const mins = Math.floor((seconds % 3600) / 60);
@@ -168,7 +175,7 @@
             if (hours > 0) timeParts.push(`${hours}h`);
             if (mins > 0) timeParts.push(`${mins}m`);
             timeParts.push(`${secs}s`);
-            return `⏳ ${timeParts.join(' ')}`;
+            return timeParts.join(' ');
         }
 
         function formatSavedTime(originalSeconds, adjustedSeconds) {
@@ -191,12 +198,14 @@
             lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
             section: document.getElementById('input-section'),
+            cooldown: document.getElementById('cooldown-timer'),
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
         let activeTimers = []; 
         let countdownInterval = null;
         let assignedBuilderApprenticeId = null;
+        let helperCooldownSeconds = 0;
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -224,6 +233,16 @@
 
         function processData(data) {
             globalGameData = data;
+            
+            // Lấy thời gian cooldown của thợ học việc từ mảng helpers
+            helperCooldownSeconds = 0;
+            if (data.helpers && Array.isArray(data.helpers)) {
+                const helperLvl8 = data.helpers.find(h => h.lvl === 8);
+                if (helperLvl8 && helperLvl8.helper_cooldown) {
+                    helperCooldownSeconds = helperLvl8.helper_cooldown;
+                }
+            }
+
             renderAllSections();
         }
 
@@ -250,29 +269,30 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            let allBuilderItems = [...buildersData, ...petsData];
+            let allBuilderItems = [...buildersData]; // Thợ học việc chỉ gán cho thợ xây/tướng/công trình
             if (allBuilderItems.length > 0) {
                 if (!assignedBuilderApprenticeId || !allBuilderItems.some(i => i.data === assignedBuilderApprenticeId)) {
                     assignedBuilderApprenticeId = allBuilderItems[0].data;
                 }
             }
 
+            // Chỉ thợ xây mới được hưởng học việc x8
             buildersData.forEach(item => {
                 item.originalTimer = item.timer;
                 let t = item.timer;
                 if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t);
                 item.adjustedTimer = t;
             });
+            
+            // Linh thú và Lab chạy thời gian gốc bình thường không có phụ tá
             petsData.forEach(item => {
                 item.originalTimer = item.timer;
-                let t = item.timer;
-                if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t);
-                item.adjustedTimer = t;
+                item.adjustedTimer = item.timer;
             });
             
             labData.forEach(item => {
                 item.originalTimer = item.timer;
-                item.adjustedTimer = calculateAdjustedTime(item.timer);
+                item.adjustedTimer = item.timer;
             });
 
             buildersData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
@@ -326,9 +346,9 @@
             }
 
             renderList(upcomingData, ui.upcoming, true, false);
-            renderList(buildersData, ui.builders, false, true);
+            renderList(buildersData, ui.builders, false, true); // Thợ Xây có nút gán học việc
             renderList(labData, ui.lab, false, false);
-            renderList(petsData, ui.pets, false, true);
+            renderList(petsData, ui.pets, false, false); // Linh thú KHÔNG có phụ tá
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
@@ -353,6 +373,14 @@
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
                 
+                // Cập nhật đồng hồ đếm ngược khả dụng của thợ học việc
+                if (helperCooldownSeconds > 0) {
+                    helperCooldownSeconds--;
+                    ui.cooldown.textContent = formatTimeRealtime(helperCooldownSeconds);
+                } else {
+                    ui.cooldown.textContent = "Khả dụng ngay! 🎉";
+                }
+
                 activeTimers.forEach(task => {
                     if (task.isDone) return;
                     
@@ -374,7 +402,6 @@
             }, 1000);
         }
 
-        // Tải dữ liệu từ GitHub
         async function loadGameData() {
             try {
                 const response = await fetch('./data.json?t=' + new Date().getTime());
@@ -388,7 +415,6 @@
             }
         }
 
-        // Nút ẩn hiện khung sửa JSON
         document.getElementById('btn-toggle-edit').addEventListener('click', () => {
             if (ui.section.style.display === 'none') {
                 ui.section.style.display = 'block';
@@ -397,7 +423,6 @@
             }
         });
 
-        // Nút tải lại trực tiếp từ GitHub
         document.getElementById('btn-reload-github').addEventListener('click', () => {
             loadGameData();
         });
