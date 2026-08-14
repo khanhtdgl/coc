@@ -95,9 +95,24 @@
         <div class="card p-4 mb-4">
             <h5 class="text-info mb-3"><i class="fa-solid fa-code"></i> Dữ liệu JSON Trò Chơi</h5>
             <textarea id="json-input" class="form-control json-box mb-3" rows="3" placeholder="Dán toàn bộ mã JSON của bạn vào đây..."></textarea>
-            <button class="btn btn-coc w-100 py-2 shadow-sm" onclick="loadDataFromInput()">
-                <i class="fa-solid fa-rotate-right me-2"></i> Phân Tích & Cập Nhật Tiến Độ
-            </button>
+            
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <button class="btn btn-outline-info w-100 py-2 fw-bold rounded-10" onclick="pasteFromClipboard()">
+                        <i class="fa-solid fa-paste me-2"></i> Dán từ bộ nhớ
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-outline-danger w-100 py-2 fw-bold rounded-10" onclick="clearData()">
+                        <i class="fa-solid fa-trash-can me-2"></i> Xóa dữ liệu cũ
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-coc w-100 py-2 shadow-sm" onclick="loadDataFromInput()">
+                        <i class="fa-solid fa-rotate-right me-2"></i> Cập Nhật Tiến Độ
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -176,6 +191,31 @@
             return `📅 Kết thúc: ${endTime.toLocaleDateString('vi-VN')} lúc ${endTime.toLocaleTimeString('vi-VN')}`;
         }
 
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('json-input').value = text;
+                    loadDataFromInput();
+                } else {
+                    alert('Bộ nhớ đệm trống!');
+                }
+            } catch (err) {
+                alert('Không thể đọc bộ nhớ đệm tự động. Vui lòng dán thủ công (Ctrl + V)!');
+            }
+        }
+
+        function clearData() {
+            localStorage.removeItem('coc_saved_data');
+            document.getElementById('json-input').value = '';
+            cocData = null;
+            document.getElementById('player-tag').innerText = "Chưa tải dữ liệu";
+            document.getElementById('builder-count-badge').innerText = "0/6 Thợ";
+            document.getElementById('builders-list').innerHTML = '<div class="text-muted text-center py-4">Chưa có dữ liệu thợ xây.</div>';
+            document.getElementById('lab-list').innerHTML = '<div class="text-muted text-center py-4">Phòng thí nghiệm đang trống.</div>';
+            document.getElementById('pets-list').innerHTML = '<div class="text-muted text-center py-4">Không có linh thú nâng cấp.</div>';
+        }
+
         function loadDataFromInput() {
             const rawText = document.getElementById('json-input').value.trim();
             if (!rawText) {
@@ -212,7 +252,7 @@
             if (cocData.guardians) {
                 cocData.guardians.forEach(g => {
                     if (g.timer && g.timer > 0) {
-                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: h.lvl, timer: g.timer });
+                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: g.lvl, timer: g.timer });
                     }
                 });
             }
