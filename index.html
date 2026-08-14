@@ -72,18 +72,34 @@
     </div>
 
     <script>
-        // Tự động nhận diện thêm các ID mới
+        // TỪ ĐIỂN TIẾNG VIỆT CHUẨN (Đã cập nhật theo acc Sata Say)
         const idDictionary = {
-            28000000: "Barbarian King", 28000001: "Archer Queen", 28000002: "Grand Warden", 28000004: "Royal Champion",
-            28000006: "Battle Machine (Làng đêm)", 28000007: "Battle Copter (Làng đêm)",
-            73000000: "L.A.S.S.I", 73000001: "Electro Owl", 73000002: "Mighty Yak", 73000003: "Unicorn",
-            73000004: "Frosty", 73000007: "Poison Lizard", 73000008: "Diggy", 73000009: "Phoenix",
-            73000010: "Spirit Fox", 73000011: "Angry Jelly",
-            1000000: "Town Hall", 1000011: "Mỏ Vàng (Gold Mine)", 1000012: "Mỏ Tiên dược (Elixir Collector)", 
-            1000048: "Nhà Thú cưng / Trại Lính", 1000043: "Nhà Thợ Xây",
-            102000039: "Mô-đun Vũ khí Town Hall", // Cái này bạn đang nâng cấp bị ẩn sâu nè
-            107000001: "Guardian / Apprentice",
-            107000008: "Guardian / Apprentice"
+            // Tướng
+            28000000: "Man di Vương (King)", 
+            28000001: "Nữ hoàng Cung thủ (Queen)", 
+            28000002: "Đại Quản giáo (Warden)", 
+            28000004: "Nữ tướng Hoàng gia (Champion)",
+            28000006: "Cỗ máy Chiến đấu", 
+            28000007: "Công tước Rồng",
+            
+            // Linh thú & Đặc biệt
+            73000000: "L.A.S.S.I", 73000001: "Cú Điện (Electro Owl)", 73000002: "Bò Mộng (Mighty Yak)", 
+            73000003: "Kỳ Lân (Unicorn)", 73000004: "Hải Mã (Frosty)", 73000007: "Thằn Lằn Độc", 
+            73000008: "Kỳ Nhông (Diggy)", 73000009: "Phượng Hoàng (Phoenix)",
+            73000010: "Cáo Linh Hồn", 73000011: "Sứa Tức Giận",
+            
+            // Thợ xây tập sự / Sự kiện
+            107000001: "Máy ném bánh",
+            107000008: "Tiểu phu",
+            
+            // Công trình cơ bản
+            1000000: "Hội trường Tòa thị chính", 
+            102000039: "Kẻ hủy diệt",
+            1000048: "Tháp Pháp sư", 
+            1000011: "Mỏ Vàng", 
+            1000012: "Máy hút Tiên dược", 
+            1000013: "Giàn khoan Hắc Tiên dược",
+            1000043: "Nhà Thợ Xây"
         };
 
         function getName(id) { 
@@ -139,13 +155,11 @@
 
             let allUpgrades = [];
 
-            // THUẬT TOÁN QUÉT Sâu (Deep Scan)
-            // Lục tung mọi ngóc ngách của JSON, không chừa một mảng ẩn nào
+            // THUẬT TOÁN QUÉT SÂU (Deep Scan)
             function deepScan(obj) {
                 if (Array.isArray(obj)) {
                     obj.forEach(deepScan);
                 } else if (obj !== null && typeof obj === 'object') {
-                    // Cứ thấy có "timer" và có ID "data" là hốt trọn!
                     if (obj.timer && obj.timer > 0 && obj.data !== undefined) {
                         allUpgrades.push(obj);
                     }
@@ -155,9 +169,9 @@
                 }
             }
             
-            deepScan(data); // Bắt đầu quét toàn bộ file JSON
+            deepScan(data);
 
-            // Phân loại
+            // PHÂN LOẠI
             allUpgrades.forEach(item => {
                 const idStr = item.data.toString();
                 const li = document.createElement('li');
@@ -166,21 +180,16 @@
                 
                 li.innerHTML = `<span>${name} ➡️ Lên cấp ${targetLevel}</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
                 
-                // 4000xxx và 2600xxx là lính/phép
                 if (idStr.startsWith("400") || idStr.startsWith("260")) {
-                    ui.lab.appendChild(li);
-                } 
-                // 7300xxx là Linh thú
-                else if (idStr.startsWith("730")) {
-                    ui.pets.appendChild(li);
-                } 
-                // Còn lại CHẮC CHẮN là thợ xây (kể cả Làng chính lẫn Làng đêm)
-                else {
-                    ui.builders.appendChild(li);
+                    ui.lab.appendChild(li); // Phòng thí nghiệm (Lính & Phép)
+                } else if (idStr.startsWith("730")) {
+                    ui.pets.appendChild(li); // Chuồng linh thú
+                } else {
+                    ui.builders.appendChild(li); // Thợ xây
                 }
             });
 
-            // Hiển thị số lượng lên Badge đỏ
+            // CẬP NHẬT CON SỐ
             ui.counts.builders.textContent = ui.builders.children.length;
             ui.counts.lab.textContent = ui.lab.children.length;
             ui.counts.pets.textContent = ui.pets.children.length;
