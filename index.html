@@ -26,15 +26,21 @@
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
         
-        /* Bảng thợ học việc chuẩn game */
-        .apprentice-card { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        /* Bảng thợ học việc chuẩn giao diện game */
+        .apprentice-card { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .apprentice-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .apprentice-left h3 { color: #f39c12; font-size: 1.1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-        .apprentice-left p { font-size: 0.85rem; color: #bbb; }
-        .apprentice-right { display: flex; gap: 10px; align-items: center; }
-        .apprentice-box { background: #2c2c2e; border: 1px solid #4a4a4c; padding: 8px 12px; border-radius: 8px; text-align: center; }
-        .apprentice-box .label { font-size: 0.7rem; color: #aaa; display: block; }
-        .apprentice-box .value { font-size: 0.95rem; font-weight: bold; color: #fff; }
+        .apprentice-left p { font-size: 0.8rem; color: #bbb; }
+        .apprentice-stats { display: flex; gap: 10px; }
+        .apprentice-box { background: #2c2c2e; border: 1px solid #4a4a4c; padding: 6px 10px; border-radius: 8px; text-align: center; }
+        .apprentice-box .label { font-size: 0.65rem; color: #aaa; display: block; }
+        .apprentice-box .value { font-size: 0.85rem; font-weight: bold; color: #fff; }
         .apprentice-box .value.highlight { color: #f1c40f; }
+
+        /* Khung chọn thợ xây trực tiếp ở bảng học việc */
+        .apprentice-assign-row { display: flex; align-items: center; justify-content: space-between; background: #2c2c2e; padding: 10px; border-radius: 8px; border: 1px solid #4a4a4c; gap: 10px; flex-wrap: wrap; }
+        .apprentice-assign-row label { font-size: 0.85rem; color: #f39c12; font-weight: bold; }
+        .apprentice-assign-row select { flex: 1; padding: 6px 10px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; outline: none; min-width: 200px; }
 
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
@@ -56,16 +62,7 @@
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        .item-left-side { display: flex; align-items: center; gap: 10px; flex: 1; }
-        
-        .btn-assign-app {
-            background: #2c2c2e; color: #8e8e93; border: 1px solid #4a4a4c; border-radius: 6px;
-            padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-            transition: 0.2s; white-space: nowrap;
-        }
-        .btn-assign-app.active { background: #e67e22; color: #fff; border-color: #f39c12; font-weight: bold; }
-
-        .item-info { display: flex; flex-direction: column; gap: 4px; }
+        .item-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .item-name { font-weight: 600; font-size: 0.95rem; color: #fff; }
 
         .saved-time { font-size: 0.75rem; color: #e67e22; font-weight: bold; display: none; }
@@ -107,21 +104,29 @@
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
-            <!-- BẢNG THỢ XÂY HỌC VIỆC RIÊNG BIỆT -->
+            <!-- BẢNG THỢ XÂY HỌC VIỆC VÀ CHỌN THỢ XÂY PHỤ TRÁCH -->
             <div class="apprentice-card">
-                <div class="apprentice-left">
-                    <h3>👷 Thợ xây học việc cấp 8</h3>
-                    <p>Giảm 8 giờ làm việc mỗi ngày cho 1 thợ được chọn</p>
+                <div class="apprentice-top">
+                    <div class="apprentice-left">
+                        <h3>👷 Thợ xây học việc cấp 8</h3>
+                        <p>Giảm thời gian làm việc (x8 trong 1 giờ mỗi ngày)</p>
+                    </div>
+                    <div class="apprentice-stats">
+                        <div class="apprentice-box">
+                            <span class="label">Tốc độ</span>
+                            <span class="value" style="color: #e67e22;">x8 (1 giờ)</span>
+                        </div>
+                        <div class="apprentice-box">
+                            <span class="label">Khả dụng sau</span>
+                            <span class="value highlight" id="cooldown-timer">Đang tính...</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="apprentice-right">
-                    <div class="apprentice-box">
-                        <span class="label">Tốc độ làm việc</span>
-                        <span class="value" style="color: #e67e22;">x8</span>
-                    </div>
-                    <div class="apprentice-box">
-                        <span class="label">Khả dụng sau</span>
-                        <span class="value highlight" id="cooldown-timer">Đang tính...</span>
-                    </div>
+                <div class="apprentice-assign-row">
+                    <label for="apprentice-target-select">🎯 Đang giao cho thợ:</label>
+                    <select id="apprentice-target-select">
+                        <option value="">-- Chọn công trình cần x8 --</option>
+                    </select>
                 </div>
             </div>
 
@@ -181,10 +186,9 @@
         function formatSavedTime(originalSeconds, adjustedSeconds) {
             const diff = originalSeconds - adjustedSeconds;
             if (diff <= 0) return "";
-            const days = Math.floor(diff / (3600 * 24));
-            const hours = Math.floor((diff % (3600 * 24)) / 3600);
-            if (days > 0) return `⏱️ Thời gian tiết kiệm: ${days}ngày ${hours}giờ`;
-            return `⏱️ Thời gian tiết kiệm: ${hours}giờ`;
+            const hours = Math.floor(diff / 3600);
+            const mins = Math.floor((diff % 3600) / 60);
+            return `⏱️ Thời gian x8 tiết kiệm: ${hours > 0 ? hours + 'h ' : ''}${mins}m`;
         }
 
         function formatTargetDate(endTimeInSeconds) {
@@ -199,6 +203,7 @@
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
             section: document.getElementById('input-section'),
             cooldown: document.getElementById('cooldown-timer'),
+            assignSelect: document.getElementById('apprentice-target-select'),
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
@@ -224,9 +229,10 @@
             }
         }
 
-        function calculateAdjustedTime(timerSeconds) {
-            const ratio = 16 / 24; 
-            return Math.floor(timerSeconds * ratio);
+        // Cơ chế x8 trong 1 giờ làm việc: Giảm trực tiếp 7 tiếng (8h gốc - 1h thực tế = giảm 7h)
+        function calculateX8Time(timerSeconds) {
+            const hoursReduction = 7 * 3600; 
+            return Math.max(0, timerSeconds - hoursReduction);
         }
 
         let globalGameData = null;
@@ -234,7 +240,6 @@
         function processData(data) {
             globalGameData = data;
             
-            // Lấy thời gian cooldown của thợ học việc từ mảng helpers
             helperCooldownSeconds = 0;
             if (data.helpers && Array.isArray(data.helpers)) {
                 const helperLvl8 = data.helpers.find(h => h.lvl === 8);
@@ -269,22 +274,33 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            let allBuilderItems = [...buildersData]; // Thợ học việc chỉ gán cho thợ xây/tướng/công trình
+            let allBuilderItems = [...buildersData];
+            
+            // Cập nhật danh sách chọn trong thẻ select của thợ học việc
+            ui.assignSelect.innerHTML = '<option value="">-- Chọn công trình để x8 (1 giờ) --</option>';
+            allBuilderItems.forEach(item => {
+                const name = getName(item.data);
+                const opt = document.createElement('option');
+                opt.value = item.data;
+                opt.textContent = `${name} (Cấp ${(item.lvl || 0) + 1})`;
+                if (item.data == assignedBuilderApprenticeId) opt.selected = true;
+                ui.assignSelect.appendChild(opt);
+            });
+
             if (allBuilderItems.length > 0) {
-                if (!assignedBuilderApprenticeId || !allBuilderItems.some(i => i.data === assignedBuilderApprenticeId)) {
+                if (!assignedBuilderApprenticeId || !allBuilderItems.some(i => i.data == assignedBuilderApprenticeId)) {
                     assignedBuilderApprenticeId = allBuilderItems[0].data;
+                    ui.assignSelect.value = assignedBuilderApprenticeId;
                 }
             }
 
-            // Chỉ thợ xây mới được hưởng học việc x8
             buildersData.forEach(item => {
                 item.originalTimer = item.timer;
                 let t = item.timer;
-                if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t);
+                if (item.data == assignedBuilderApprenticeId) t = calculateX8Time(t);
                 item.adjustedTimer = t;
             });
             
-            // Linh thú và Lab chạy thời gian gốc bình thường không có phụ tá
             petsData.forEach(item => {
                 item.originalTimer = item.timer;
                 item.adjustedTimer = item.timer;
@@ -308,24 +324,15 @@
                     const itemName = getName(item.data);
                     const endTime = jsonTimestamp + item.adjustedTimer;
                     const dateStr = formatTargetDate(endTime);
-                    const isAssigned = allowAssign && (item.data === assignedBuilderApprenticeId);
+                    const isAssigned = allowAssign && (item.data == assignedBuilderApprenticeId);
                     const savedTimeStr = formatSavedTime(item.originalTimer, item.adjustedTimer);
 
                     if (isAssigned) li.classList.add('has-apprentice');
 
-                    let assignBtnHTML = allowAssign ? `
-                        <button class="btn-assign-app ${isAssigned ? 'active' : ''}" onclick="assignApprentice(${item.data})">
-                            👷 ${isAssigned ? 'Đang học việc' : 'Gán thợ học việc'}
-                        </button>
-                    ` : '';
-
                     li.innerHTML = `
-                        <div class="item-left-side">
-                            <div class="item-info">
-                                <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
-                                <span class="saved-time">${savedTimeStr}</span>
-                                ${assignBtnHTML}
-                            </div>
+                        <div class="item-info">
+                            <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
+                            <span class="saved-time">${savedTimeStr} ${isAssigned ? '⚡(Đang x8)' : ''}</span>
                         </div>
                         <div class="timer-box">
                             <span class="timer">Đang tính...</span>
@@ -346,9 +353,9 @@
             }
 
             renderList(upcomingData, ui.upcoming, true, false);
-            renderList(buildersData, ui.builders, false, true); // Thợ Xây có nút gán học việc
+            renderList(buildersData, ui.builders, false, true);
             renderList(labData, ui.lab, false, false);
-            renderList(petsData, ui.pets, false, false); // Linh thú KHÔNG có phụ tá
+            renderList(petsData, ui.pets, false, false);
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
@@ -363,17 +370,17 @@
             startRealtimeCountdown();
         }
 
-        window.assignApprentice = function(id) {
-            assignedBuilderApprenticeId = id;
-            localStorage.setItem('coc_assigned_apprentice', id);
+        // Sự kiện khi thay đổi thợ xây nhận x8 trên bảng học việc
+        ui.assignSelect.addEventListener('change', (e) => {
+            assignedBuilderApprenticeId = e.target.value;
+            localStorage.setItem('coc_assigned_apprentice', assignedBuilderApprenticeId);
             renderAllSections();
-        }
+        });
 
         function startRealtimeCountdown() {
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
                 
-                // Cập nhật đồng hồ đếm ngược khả dụng của thợ học việc
                 if (helperCooldownSeconds > 0) {
                     helperCooldownSeconds--;
                     ui.cooldown.textContent = formatTimeRealtime(helperCooldownSeconds);
@@ -455,7 +462,7 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = parseInt(localStorage.getItem('coc_assigned_apprentice'));
+            if(localStorage.getItem('coc_assigned_apprentice')) assignedBuilderApprenticeId = localStorage.getItem('coc_assigned_apprentice');
             loadGameData();
         });
     </script>
