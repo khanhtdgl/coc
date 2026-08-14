@@ -4,7 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoC Upgrade Tracker</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f7f6; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.2rem; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        textarea { width: 100%; padding: 12px; border: 2px dashed #bdc3c7; border-radius: 6px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; transition: 0.3s; }
+        textarea:focus { border-color: #2980b9; background-color: #f8fbff; }
+        .button-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        button { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+        .btn-info { background-color: #27ae60; color: white; flex: 1; }
+        .btn-info:hover { background-color: #2ecc71; }
+        .btn-primary { background-color: #2980b9; color: white; flex: 1.5; }
+        .btn-primary:hover { background-color: #3498db; }
+        .btn-secondary { background-color: #e74c3c; color: white; flex: 0.5; }
+        .btn-secondary:hover { background-color: #c0392b; }
+
+        .item-list { list-style: none; }
+        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .level { font-weight: bold; color: #27ae60; background: #e8f8f5; padding: 3px 8px; border-radius: 4px; font-size: 0.9em; }
+        .timer { color: #c0392b; font-size: 0.9em; background: #fadbd8; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,13 +39,13 @@
         <main>
             <section class="card input-section">
                 <h2>Nhập dữ liệu JSON</h2>
-                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây..." rows="5"></textarea>
+                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây (Nhấn Ctrl+V)..." rows="5"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
                     <button id="btn-process" class="btn-primary">🚀 Hiển thị dữ liệu</button>
-                    <button id="btn-clear" class="btn-secondary">🗑️ Xóa ô</button>
+                    <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
                 </div>
-                <p id="error-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;"></p>
+                <p id="error-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
             <section class="card">
@@ -42,6 +65,127 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const idDictionary = {
+            28000000: "Barbarian King", 28000001: "Archer Queen", 28000002: "Grand Warden", 28000004: "Royal Champion",
+            28000006: "Battle Machine", 28000007: "Battle Copter",
+            73000000: "L.A.S.S.I", 73000001: "Electro Owl", 73000002: "Mighty Yak", 73000003: "Unicorn",
+            73000004: "Frosty", 73000007: "Poison Lizard", 73000008: "Diggy", 73000009: "Phoenix",
+            73000010: "Spirit Fox", 73000011: "Angry Jelly",
+            1000000: "Town Hall", 1000011: "Gold Mine", 1000012: "Elixir Collector", 
+            1000013: "Dark Elixir Drill", 1000020: "Clan Castle", 1000048: "Pet House", 1000043: "Builder's Hut"
+        };
+
+        function getName(id) { return idDictionary[id] || `Mã ID: ${id}`; }
+
+        function formatTime(seconds) {
+            if (!seconds || seconds <= 0) return "";
+            const days = Math.floor(seconds / (3600 * 24));
+            const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            let timeParts = [];
+            if (days > 0) timeParts.push(`${days}d`);
+            if (hours > 0) timeParts.push(`${hours}h`);
+            if (mins > 0 || timeParts.length === 0) timeParts.push(`${mins}m`);
+            return `Còn: ${timeParts.join(' ')}`;
+        }
+
+        const uiElements = {
+            upgrading: document.getElementById('upgrading-list'),
+            heroes: document.getElementById('heroes-list'),
+            pets: document.getElementById('pets-list'),
+            playerTag: document.getElementById('player-tag'),
+            errorMsg: document.getElementById('error-msg'),
+            inputArea: document.getElementById('json-input')
+        };
+
+        function clearUI() {
+            uiElements.upgrading.innerHTML = '';
+            uiElements.heroes.innerHTML = '';
+            uiElements.pets.innerHTML = '';
+            uiElements.playerTag.textContent = 'Đang xử lý...';
+            uiElements.errorMsg.style.display = 'none';
+        }
+
+        function showError(message) {
+            uiElements.errorMsg.textContent = message;
+            uiElements.errorMsg.style.display = 'block';
+            uiElements.playerTag.textContent = 'Lỗi dữ liệu';
+            uiElements.playerTag.style.color = '#e74c3c';
+        }
+
+        function processData(data) {
+            clearUI(); 
+            if (!data || typeof data !== 'object') {
+                showError("Lỗi: Dữ liệu JSON không hợp lệ."); return;
+            }
+            uiElements.playerTag.textContent = data.tag || "Không có Tag";
+            uiElements.playerTag.style.color = "#27ae60";
+
+            function renderItems(container, itemsArray, isBuilding = false) {
+                if (!Array.isArray(itemsArray)) return;
+                itemsArray.forEach(item => {
+                    if (!item || !item.data) return; 
+                    const li = document.createElement('li');
+                    const name = getName(item.data);
+                    const currentLevel = item.lvl || 0;
+                    
+                    if (item.timer && item.timer > 0) {
+                        const actionText = isBuilding ? `Đang lên Cấp ${currentLevel + 1}` : `➡️ Cấp ${currentLevel + 1}`;
+                        const upLi = document.createElement('li');
+                        upLi.innerHTML = `<span>${name} (${actionText})</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
+                        uiElements.upgrading.appendChild(upLi);
+                    }
+                    if (!isBuilding) {
+                        li.innerHTML = `<span>${name}</span> <div><span class="level">Cấp ${currentLevel}</span></div>`;
+                        container.appendChild(li);
+                    }
+                });
+            }
+
+            renderItems(uiElements.heroes, data.heroes);
+            renderItems(uiElements.pets, data.pets);
+            renderItems(null, data.buildings, true);
+            renderItems(null, data.buildings2, true); // Quét thêm làng 2 nếu có
+
+            if (uiElements.upgrading.children.length === 0) {
+                uiElements.upgrading.innerHTML = "<li><span style='color:#7f8c8d;'>Zzz... Không có công trình/tướng nào đang được nâng cấp!</span></li>";
+            }
+        }
+
+        function handleJSON(jsonText) {
+            const text = jsonText.trim();
+            if (!text) return;
+            try {
+                const data = JSON.parse(text); 
+                processData(data);
+            } catch (error) {
+                showError("Mã JSON bị sai định dạng. Vui lòng copy lại toàn bộ từ đầu '{' đến cuối '}'!");
+            }
+        }
+
+        document.getElementById('btn-process').addEventListener('click', () => { handleJSON(uiElements.inputArea.value); });
+        
+        document.getElementById('btn-paste').addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText(); 
+                uiElements.inputArea.value = text;
+                handleJSON(text);
+            } catch (err) {
+                showError("Trình duyệt không cho phép dán tự động. Vui lòng bấm vào ô trống và nhấn Ctrl+V!");
+            }
+        });
+
+        uiElements.inputArea.addEventListener('input', (e) => {
+            setTimeout(() => { handleJSON(e.target.value); }, 300);
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            uiElements.inputArea.value = '';
+            clearUI();
+            uiElements.playerTag.textContent = 'Chưa có dữ liệu';
+            uiElements.playerTag.style.color = '#f1c40f';
+        });
+    </script>
 </body>
 </html>
