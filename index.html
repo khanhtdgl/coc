@@ -9,7 +9,7 @@
         body { background-color: #f4f7f6; color: #333; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; }
         header { text-align: center; margin-bottom: 30px; background: #2c3e50; color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.2rem; }
+        h2 { margin-bottom: 15px; color: #2980b9; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;}
         .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         textarea { width: 100%; padding: 12px; border: 2px dashed #bdc3c7; border-radius: 6px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; transition: 0.3s; }
         textarea:focus { border-color: #2980b9; background-color: #f8fbff; }
@@ -24,22 +24,27 @@
         .btn-secondary:hover { background-color: #c0392b; }
 
         .item-list { list-style: none; }
-        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .level { font-weight: bold; color: #27ae60; background: #e8f8f5; padding: 3px 8px; border-radius: 4px; font-size: 0.9em; }
+        .item-list li { background: #ecf0f1; margin-bottom: 10px; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db;}
+        
+        /* Màu sắc cho từng nhóm */
+        #builders-list li { border-left-color: #f39c12; }
+        #lab-list li { border-left-color: #9b59b6; }
+        #pets-list li { border-left-color: #2ecc71; }
+
         .timer { color: #c0392b; font-size: 0.9em; background: #fadbd8; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .empty-msg { color: #7f8c8d; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Clash of Clans Tracker</h1>
+            <h1>Trạm Theo Dõi Nâng Cấp CoC</h1>
             <p>Player Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
         </header>
 
         <main>
             <section class="card input-section">
-                <h2>Nhập dữ liệu JSON</h2>
-                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây (Nhấn Ctrl+V)..." rows="5"></textarea>
+                <textarea id="json-input" placeholder="Dán mã JSON của bạn vào đây (Nhấn Ctrl+V)..." rows="4"></textarea>
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
                     <button id="btn-process" class="btn-primary">🚀 Hiển thị dữ liệu</button>
@@ -48,35 +53,47 @@
                 <p id="error-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
 
+            <!-- NHÓM 1: THỢ XÂY -->
             <section class="card">
-                <h2>🏗️ Đang Nâng Cấp (Upgrading)</h2>
-                <ul id="upgrading-list" class="item-list"></ul>
+                <h2>👷 Nhóm 1: Thợ Xây (Tối đa 6)</h2>
+                <ul id="builders-list" class="item-list"></ul>
             </section>
 
+            <!-- NHÓM 2: PHÒNG THÍ NGHIỆM -->
             <section class="card">
-                <h2>👑 Heroes (Tướng)</h2>
-                <ul id="heroes-list" class="item-list"></ul>
+                <h2>🧪 Nhóm 2: Phòng Thí Nghiệm (Tối đa 1)</h2>
+                <ul id="lab-list" class="item-list"></ul>
             </section>
             
+            <!-- NHÓM 3: CHUỒNG LINH THÚ -->
             <section class="card">
-                <h2>🐾 Pets (Thú cưng)</h2>
+                <h2>🐾 Nhóm 3: Chuồng Linh Thú (Tối đa 1)</h2>
                 <ul id="pets-list" class="item-list"></ul>
             </section>
         </main>
     </div>
 
     <script>
+        // Từ điển cơ bản
         const idDictionary = {
             28000000: "Barbarian King", 28000001: "Archer Queen", 28000002: "Grand Warden", 28000004: "Royal Champion",
-            28000006: "Battle Machine", 28000007: "Battle Copter",
             73000000: "L.A.S.S.I", 73000001: "Electro Owl", 73000002: "Mighty Yak", 73000003: "Unicorn",
             73000004: "Frosty", 73000007: "Poison Lizard", 73000008: "Diggy", 73000009: "Phoenix",
             73000010: "Spirit Fox", 73000011: "Angry Jelly",
-            1000000: "Town Hall", 1000011: "Gold Mine", 1000012: "Elixir Collector", 
-            1000013: "Dark Elixir Drill", 1000020: "Clan Castle", 1000048: "Pet House", 1000043: "Builder's Hut"
+            1000000: "Town Hall", 1000011: "Gold Mine", 1000012: "Elixir Collector", 1000020: "Clan Castle"
         };
 
-        function getName(id) { return idDictionary[id] || `Mã ID: ${id}`; }
+        // Hàm lấy tên (nếu không có trong từ điển thì tự đoán loại dựa trên ID)
+        function getName(id) { 
+            if (idDictionary[id]) return idDictionary[id];
+            
+            const idStr = id.toString();
+            if (idStr.startsWith("1000")) return `Công trình (ID: ${id})`;
+            if (idStr.startsWith("1200")) return `Bẫy (ID: ${id})`;
+            if (idStr.startsWith("4000")) return `Lính/Xe (ID: ${id})`;
+            if (idStr.startsWith("2600")) return `Phép thuật (ID: ${id})`;
+            return `Mục ID: ${id}`; 
+        }
 
         function formatTime(seconds) {
             if (!seconds || seconds <= 0) return "";
@@ -90,28 +107,45 @@
             return `Còn: ${timeParts.join(' ')}`;
         }
 
-        const uiElements = {
-            upgrading: document.getElementById('upgrading-list'),
-            heroes: document.getElementById('heroes-list'),
+        const ui = {
+            builders: document.getElementById('builders-list'),
+            lab: document.getElementById('lab-list'),
             pets: document.getElementById('pets-list'),
-            playerTag: document.getElementById('player-tag'),
-            errorMsg: document.getElementById('error-msg'),
-            inputArea: document.getElementById('json-input')
+            tag: document.getElementById('player-tag'),
+            error: document.getElementById('error-msg'),
+            input: document.getElementById('json-input')
         };
 
         function clearUI() {
-            uiElements.upgrading.innerHTML = '';
-            uiElements.heroes.innerHTML = '';
-            uiElements.pets.innerHTML = '';
-            uiElements.playerTag.textContent = 'Đang xử lý...';
-            uiElements.errorMsg.style.display = 'none';
+            ui.builders.innerHTML = '';
+            ui.lab.innerHTML = '';
+            ui.pets.innerHTML = '';
+            ui.tag.textContent = 'Đang xử lý...';
+            ui.error.style.display = 'none';
         }
 
-        function showError(message) {
-            uiElements.errorMsg.textContent = message;
-            uiElements.errorMsg.style.display = 'block';
-            uiElements.playerTag.textContent = 'Lỗi dữ liệu';
-            uiElements.playerTag.style.color = '#e74c3c';
+        function showError(msg) {
+            ui.error.textContent = msg;
+            ui.error.style.display = 'block';
+            ui.tag.textContent = 'Lỗi dữ liệu';
+            ui.tag.style.color = '#e74c3c';
+        }
+
+        // Hàm trích xuất dữ liệu đang nâng cấp và nhét vào đúng danh sách
+        function extractUpgrading(itemsArray, targetList) {
+            if (!Array.isArray(itemsArray)) return;
+            
+            itemsArray.forEach(item => {
+                // Chỉ lấy những mục CÓ THỜI GIAN NÂNG CẤP (timer > 0)
+                if (item && item.timer && item.timer > 0) {
+                    const li = document.createElement('li');
+                    const name = getName(item.data);
+                    const targetLevel = (item.lvl || 0) + 1;
+                    
+                    li.innerHTML = `<span>${name} ➡️ Lên cấp ${targetLevel}</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
+                    targetList.appendChild(li);
+                }
+            });
         }
 
         function processData(data) {
@@ -119,38 +153,29 @@
             if (!data || typeof data !== 'object') {
                 showError("Lỗi: Dữ liệu JSON không hợp lệ."); return;
             }
-            uiElements.playerTag.textContent = data.tag || "Không có Tag";
-            uiElements.playerTag.style.color = "#27ae60";
+            ui.tag.textContent = data.tag || "Không có Tag";
+            ui.tag.style.color = "#27ae60";
 
-            function renderItems(container, itemsArray, isBuilding = false) {
-                if (!Array.isArray(itemsArray)) return;
-                itemsArray.forEach(item => {
-                    if (!item || !item.data) return; 
-                    const li = document.createElement('li');
-                    const name = getName(item.data);
-                    const currentLevel = item.lvl || 0;
-                    
-                    if (item.timer && item.timer > 0) {
-                        const actionText = isBuilding ? `Đang lên Cấp ${currentLevel + 1}` : `➡️ Cấp ${currentLevel + 1}`;
-                        const upLi = document.createElement('li');
-                        upLi.innerHTML = `<span>${name} (${actionText})</span> <span class="timer">⏳ ${formatTime(item.timer)}</span>`;
-                        uiElements.upgrading.appendChild(upLi);
-                    }
-                    if (!isBuilding) {
-                        li.innerHTML = `<span>${name}</span> <div><span class="level">Cấp ${currentLevel}</span></div>`;
-                        container.appendChild(li);
-                    }
-                });
-            }
+            // 1. NHÓM 1: THỢ XÂY (Làm nhiệm vụ nâng Công trình, Bẫy, Tướng)
+            extractUpgrading(data.buildings, ui.builders);
+            extractUpgrading(data.traps, ui.builders);
+            extractUpgrading(data.heroes, ui.builders);
 
-            renderItems(uiElements.heroes, data.heroes);
-            renderItems(uiElements.pets, data.pets);
-            renderItems(null, data.buildings, true);
-            renderItems(null, data.buildings2, true); // Quét thêm làng 2 nếu có
+            // 2. NHÓM 2: PHÒNG THÍ NGHIỆM (Nghiên cứu Lính, Phép, Xe công thành)
+            extractUpgrading(data.units, ui.lab);
+            extractUpgrading(data.spells, ui.lab);
+            extractUpgrading(data.siege_machines, ui.lab);
 
-            if (uiElements.upgrading.children.length === 0) {
-                uiElements.upgrading.innerHTML = "<li><span style='color:#7f8c8d;'>Zzz... Không có công trình/tướng nào đang được nâng cấp!</span></li>";
-            }
+            // 3. NHÓM 3: CHUỒNG LINH THÚ (Huấn luyện Pets)
+            extractUpgrading(data.pets, ui.pets);
+
+            // Hiển thị câu thông báo nếu nhóm đó đang rảnh rỗi (không có gì nâng cấp)
+            if (ui.builders.children.length === 0) 
+                ui.builders.innerHTML = "<li class='empty-msg'>😴 6 thợ xây đang ngủ khò khò...</li>";
+            if (ui.lab.children.length === 0) 
+                ui.lab.innerHTML = "<li class='empty-msg'>🧪 Phòng thí nghiệm đang tắt đèn...</li>";
+            if (ui.pets.children.length === 0) 
+                ui.pets.innerHTML = "<li class='empty-msg'>🐾 Không có linh thú nào đang huấn luyện...</li>";
         }
 
         function handleJSON(jsonText) {
@@ -160,31 +185,31 @@
                 const data = JSON.parse(text); 
                 processData(data);
             } catch (error) {
-                showError("Mã JSON bị sai định dạng. Vui lòng copy lại toàn bộ từ đầu '{' đến cuối '}'!");
+                showError("Mã JSON bị sai định dạng. Vui lòng copy đầy đủ từ đầu đến cuối!");
             }
         }
 
-        document.getElementById('btn-process').addEventListener('click', () => { handleJSON(uiElements.inputArea.value); });
+        document.getElementById('btn-process').addEventListener('click', () => { handleJSON(ui.input.value); });
         
         document.getElementById('btn-paste').addEventListener('click', async () => {
             try {
                 const text = await navigator.clipboard.readText(); 
-                uiElements.inputArea.value = text;
+                ui.input.value = text;
                 handleJSON(text);
             } catch (err) {
-                showError("Trình duyệt không cho phép dán tự động. Vui lòng bấm vào ô trống và nhấn Ctrl+V!");
+                showError("Trình duyệt không cho phép dán tự động. Vui lòng dán thủ công!");
             }
         });
 
-        uiElements.inputArea.addEventListener('input', (e) => {
+        ui.input.addEventListener('input', (e) => {
             setTimeout(() => { handleJSON(e.target.value); }, 300);
         });
 
         document.getElementById('btn-clear').addEventListener('click', () => {
-            uiElements.inputArea.value = '';
+            ui.input.value = '';
             clearUI();
-            uiElements.playerTag.textContent = 'Chưa có dữ liệu';
-            uiElements.playerTag.style.color = '#f1c40f';
+            ui.tag.textContent = 'Chưa có dữ liệu';
+            ui.tag.style.color = '#f1c40f';
         });
     </script>
 </body>
