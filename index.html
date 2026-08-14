@@ -3,53 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clash of Clans Progress Tracker</title>
+    <title>Clash of Clans Tracker - #PGCGR208R</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { background-color: #1e1e1e; border: 1px solid #333; }
-        .timer { font-family: monospace; font-weight: bold; color: #ffc107; font-size: 1.1em; }
-        .end-time { font-size: 0.85em; color: #a0a0a0; }
-        textarea { background-color: #222 !important; color: #fff !important; border: 1px solid #444 !important; font-family: monospace; font-size: 12px; }
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --coc-gold: #f59e0b;
+            --coc-blue: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', system-ui, -apple-src, sans-serif;
+            min-height: 100vh;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            border-color: #475569;
+        }
+        .header-title {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        textarea.json-box {
+            background-color: #0f172a !important;
+            color: #38bdf8 !important;
+            border: 1px solid var(--border-color) !important;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+        textarea.json-box:focus {
+            border-color: var(--coc-blue) !important;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        }
+        .timer-badge {
+            font-family: monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--coc-gold);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            display: inline-block;
+        }
+        .progress-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .progress-item:last-child {
+            margin-bottom: 0;
+        }
+        .item-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #e2e8f0;
+        }
+        .item-level {
+            background: #334155;
+            color: #cbd5e1;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .end-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .btn-coc {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            color: #000;
+            font-weight: 700;
+            transition: opacity 0.2s;
+        }
+        .btn-coc:hover {
+            opacity: 0.9;
+            color: #000;
+        }
     </style>
 </head>
-<body class="py-4">
-    <div class="container">
-        <h1 class="text-center mb-3 text-warning">🛡️ CoC Progress Tracker</h1>
+<body class="py-5">
+    <div class="container main-container">
+        <div class="text-center mb-5">
+            <h1 class="header-title display-5 mb-2"><i class="fa-solid fa-shield-halved"></i> Clash of Clans Tracker</h1>
+            <p class="text-muted">Mã tài khoản: <span id="player-tag" class="text-white fw-bold">Chưa tải dữ liệu</span></p>
+        </div>
         
-        <div class="card p-3 mb-4 shadow">
-            <h5 class="text-info mb-2">📋 Dán dữ liệu JSON vào đây:</h5>
-            <textarea id="json-input" class="form-control mb-2" rows="4" placeholder="Dán đoạn JSON tài khoản của bạn vào đây..."></textarea>
-            <button class="btn btn-warning w-100 fw-bold" onclick="loadDataFromInput()">Cập nhật tiến độ</button>
+        <!-- Khung dán JSON tối ưu -->
+        <div class="card p-4 mb-4">
+            <h5 class="text-info mb-3"><i class="fa-solid fa-code"></i> Dữ liệu JSON Trò Chơi</h5>
+            <textarea id="json-input" class="form-control json-box mb-3" rows="3" placeholder="Dán toàn bộ mã JSON của bạn vào đây..."></textarea>
+            <button class="btn btn-coc w-100 py-2 shadow-sm" onclick="loadDataFromInput()">
+                <i class="fa-solid fa-rotate-right me-2"></i> Phân Tích & Cập Nhật Tiến Độ
+            </button>
         </div>
 
-        <p class="text-center text-muted mb-4">Player Tag: <span id="player-tag" class="text-white fw-bold">Chưa có</span></p>
-
+        <!-- 3 Cột hiển thị chính -->
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card p-3 h-100 shadow">
-                    <h4 class="text-info border-bottom pb-2" id="builders-title">👷 Thợ Xây Đang Làm (0/6)</h4>
-                    <ul id="builders-list" class="list-unstyled mt-3">
-                        <li class="text-muted">Chưa có dữ liệu.</li>
-                    </ul>
+            <!-- Cột Thợ Xây -->
+            <div class="col-lg-4">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+                        <h4 class="text-warning m-0 fs-5"><i class="fa-solid fa-hard-hat me-2"></i> Thợ Xây</h4>
+                        <span id="builder-count-badge" class="badge bg-warning text-dark fw-bold fs-6">0/6</span>
+                    </div>
+                    <div id="builders-list">
+                        <div class="text-muted text-center py-4">Chưa có dữ liệu thợ xây.</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card p-3 h-100 shadow">
-                    <h4 class="text-info border-bottom pb-2">🧪 Phòng Thí Nghiệm</h4>
-                    <ul id="lab-list" class="list-unstyled mt-3">
-                        <li class="text-muted">Chưa có dữ liệu.</li>
-                    </ul>
+            <!-- Cột Phòng Thí Nghiệm -->
+            <div class="col-lg-4">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+                        <h4 class="text-info m-0 fs-5"><i class="fa-solid fa-flask-vial me-2"></i> Phòng Thí Nghiệm</h4>
+                        <span class="badge bg-info text-dark fw-bold fs-6">Lab</span>
+                    </div>
+                    <div id="lab-list">
+                        <div class="text-muted text-center py-4">Phòng thí nghiệm đang trống.</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="card p-3 h-100 shadow">
-                    <h4 class="text-info border-bottom pb-2">🐾 Chuồng Linh Thú</h4>
-                    <ul id="pets-list" class="list-unstyled mt-3">
-                        <li class="text-muted">Chưa có dữ liệu.</li>
-                    </ul>
+            <!-- Cột Linh Thú -->
+            <div class="col-lg-4">
+                <div class="card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+                        <h4 class="text-success m-0 fs-5"><i class="fa-solid fa-paw me-2"></i> Chuồng Linh Thú</h4>
+                        <span class="badge bg-success text-white fw-bold fs-6">Pets</span>
+                    </div>
+                    <div id="pets-list">
+                        <div class="text-muted text-center py-4">Không có linh thú nâng cấp.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,8 +168,9 @@
     <script>
         let cocData = null;
 
+        // Từ điển tên chuẩn xác trực quan dựa theo ID thực tế trong dữ liệu game của bạn
         const nameMapping = {
-            // Tướng & Hộ vệ
+            // Tướng & Hộ vệ chính
             28000000: "Vua Barbarian (BK)",
             28000001: "Nữ Hoàng Archer (AQ)",
             28000002: "Đại Warden (GW)",
@@ -69,15 +180,11 @@
             107000001: "Kẻ hủy diệt (Monolith)",
             107000008: "Máy ném bánh (Spell Tower)",
             
-            // Công trình chính & Làng biển (Builder Base)
+            // Công trình
             1000013: "Tháp Pháo / Công thành",
             1000011: "Xưởng chế tạo / Kho",
             1000048: "Công tước Rồng / Trại lính",
             1000043: "Tiêu phu / Pháo",
-
-            // Lab / Nghiên cứu
-            4000082: "Nghiên cứu chung (Lab)",
-            4000037: "Lính Làng Biển (Builder Base)",
 
             // Linh thú (Pets)
             73000000: "L.A.S.S.I",
@@ -94,7 +201,7 @@
         };
 
         function formatTime(seconds) {
-            if (!seconds || seconds <= 0) return "Hoàn thành";
+            if (!seconds || seconds <= 0) return "Đã hoàn thành";
             const d = Math.floor(seconds / (3600 * 24));
             const h = Math.floor((seconds % (3600 * 24)) / 3600);
             const m = Math.floor((seconds % 3600) / 60);
@@ -110,13 +217,13 @@
         function getEndTimeString(seconds) {
             if (!seconds || seconds <= 0) return "";
             const endTime = new Date(Date.now() + seconds * 1000);
-            return `📅 Kết thúc: ${endTime.toLocaleDateString('vi-VN')} ${endTime.toLocaleTimeString('vi-VN')}`;
+            return `📅 Kết thúc: ${endTime.toLocaleDateString('vi-VN')} lúc ${endTime.toLocaleTimeString('vi-VN')}`;
         }
 
         function loadDataFromInput() {
             const rawText = document.getElementById('json-input').value.trim();
             if (!rawText) {
-                alert('Vui lòng dán nội dung JSON vào ô trống!');
+                alert('Vui lòng dán mã JSON hợp lệ vào ô trống!');
                 return;
             }
             try {
@@ -128,22 +235,22 @@
                 localStorage.setItem('coc_saved_data', JSON.stringify(storageObj));
                 renderTrackers();
             } catch (e) {
-                alert('Lỗi định dạng JSON! Hãy kiểm tra lại đoạn mã.');
+                alert('Lỗi cấu trúc JSON! Vui lòng kiểm tra lại đoạn mã bạn đã dán.');
                 console.error(e);
             }
         }
 
         function renderTrackers() {
             if (!cocData) return;
-            document.getElementById('player-tag').innerText = cocData.tag || "Không rõ";
+            document.getElementById('player-tag').innerText = cocData.tag || "#Unknown";
 
-            // 1. THỢ XÂY: Quét Guardians, Heroes, Buildings (có gear_up hoặc timer), và Buildings2
+            // 1. THỢ XÂY: Quét Guardians, Heroes, Buildings có timer thực tế
             let builderItems = [];
 
             if (cocData.guardians) {
                 cocData.guardians.forEach(g => {
                     if (g.timer && g.timer > 0) {
-                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: g.lvl, timer: g.timer });
+                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ đặc biệt (ID: ${g.data})`, level: g.lvl, timer: g.timer });
                     }
                 });
             }
@@ -151,9 +258,7 @@
             if (cocData.heroes) {
                 cocData.heroes.forEach(h => {
                     if (h.timer && h.timer > 0) {
-                        builderItems.push({ name: nameMapping[h.data] || `Tướng (ID: ${h.data})`, level: h.lvl, timer: g_name = h.timer });
-                        // sửa gọn lại đối tượng push:
-                        builderItems[builderItems.length - 1].timer = h.timer;
+                        builderItems.push({ name: nameMapping[h.data] || `Tướng (ID: ${h.data})`, level: h.lvl, timer: h.timer });
                     }
                 });
             }
@@ -166,10 +271,27 @@
                 });
             }
 
+            // Quét module bên trong buildings2 / buildings có chứa timer phụ nếu có
+            if (cocData.buildings) {
+                cocData.buildings.forEach(b => {
+                    if (b.types) {
+                        b.types.forEach(t => {
+                            if (t.modules) {
+                                t.modules.forEach(m => {
+                                    if (m.timer && m.timer > 0) {
+                                        builderItems.push({ name: nameMapping[m.data] || `Tháp Phòng Thủ / Module (ID: ${m.data})`, level: m.lvl, timer: m.timer });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
             if (cocData.buildings2) {
                 cocData.buildings2.forEach(b2 => {
                     if (b2.timer && b2.timer > 0) {
-                        builderItems.push({ name: nameMapping[b2.data] || `Công trình BH (ID: ${b2.data})`, level: b2.lvl, timer: b2.timer });
+                        builderItems.push({ name: nameMapping[b2.data] || `Công trình Làng Biển (ID: ${b2.data})`, level: b2.lvl, timer: b2.timer });
                     }
                 });
             }
@@ -177,28 +299,31 @@
             // Sắp xếp thời gian ngắn nhất lên trên đầu
             builderItems.sort((a, b) => a.timer - b.timer);
 
-            const buildersUl = document.getElementById('builders-list');
-            buildersUl.innerHTML = '';
-            document.getElementById('builders-title').innerText = `👷 Thợ Xây Đang Làm (${builderItems.length}/6)`;
+            const buildersContainer = document.getElementById('builders-list');
+            buildersContainer.innerHTML = '';
+            document.getElementById('builder-count-badge').innerText = `${builderItems.length}/6 Thợ`;
 
             if (builderItems.length === 0) {
-                buildersUl.innerHTML = '<li class="text-muted">Không có thợ nào đang bận.</li>';
+                buildersContainer.innerHTML = '<div class="text-muted text-center py-4">Tất cả thợ xây đang rảnh rỗi!</div>';
             } else {
                 builderItems.forEach(item => {
-                    buildersUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
-                        <span class="end-time">${getEndTimeString(item.timer)}</span>
-                    </li>`;
+                    buildersContainer.innerHTML += `
+                        <div class="progress-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-level">Cấp ${item.level}</span>
+                            </div>
+                            <div class="timer mb-1" data-time="${item.timer}">${formatTime(item.timer)}</div>
+                            <div class="end-time"><i class="fa-regular fa-clock me-1"></i>${getEndTimeString(item.timer)}</div>
+                        </div>`;
                 });
             }
 
-            // 2. PHÒNG THÍ NGHIỆM: Quét units (có cờ helper_recurrent) hoặc units2 có timer
+            // 2. PHÒNG THÍ NGHIỆM: Quét units hoặc units2 có timer
             let labItems = [];
             if (cocData.units) {
                 cocData.units.forEach(u => {
-                    if (u.timer && u.timer > 0 && u.helper_recurrent) {
+                    if (u.timer && u.timer > 0) {
                         labItems.push({ name: nameMapping[u.data] || `Nghiên cứu Lính (ID: ${u.data})`, level: u.lvl, timer: u.timer });
                     }
                 });
@@ -206,25 +331,28 @@
             if (cocData.units2) {
                 cocData.units2.forEach(u2 => {
                     if (u2.timer && u2.timer > 0) {
-                        labItems.push({ name: nameMapping[u2.data] || `Nghiên cứu Lính BH (ID: ${u2.data})`, level: u2.lvl, timer: u2.timer });
+                        labItems.push({ name: nameMapping[u2.data] || `Nghiên cứu BH (ID: ${u2.data})`, level: u2.lvl, timer: u2.timer });
                     }
                 });
             }
 
             labItems.sort((a, b) => a.timer - b.timer);
-            const labUl = document.getElementById('lab-list');
-            labUl.innerHTML = '';
+            const labContainer = document.getElementById('lab-list');
+            labContainer.innerHTML = '';
 
             if (labItems.length === 0) {
-                labUl.innerHTML = '<li class="text-muted">Phòng thí nghiệm đang trống.</li>';
+                labContainer.innerHTML = '<div class="text-muted text-center py-4">Phòng thí nghiệm đang trống.</div>';
             } else {
                 labItems.forEach(item => {
-                    labUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
-                        <span class="end-time">${getEndTimeString(item.timer)}</span>
-                    </li>`;
+                    labContainer.innerHTML += `
+                        <div class="progress-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-level">Cấp ${item.level}</span>
+                            </div>
+                            <div class="timer mb-1" data-time="${item.timer}">${formatTime(item.timer)}</div>
+                            <div class="end-time"><i class="fa-regular fa-clock me-1"></i>${getEndTimeString(item.timer)}</div>
+                        </div>`;
                 });
             }
 
@@ -239,19 +367,22 @@
             }
 
             petItems.sort((a, b) => a.timer - b.timer);
-            const petsUl = document.getElementById('pets-list');
-            petsUl.innerHTML = '';
+            const petsContainer = document.getElementById('pets-list');
+            petsContainer.innerHTML = '';
 
             if (petItems.length === 0) {
-                petsUl.innerHTML = '<li class="text-muted">Không có linh thú nào đang nâng cấp.</li>';
+                petsContainer.innerHTML = '<div class="text-muted text-center py-4">Không có linh thú nâng cấp.</div>';
             } else {
                 petItems.forEach(item => {
-                    petsUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
-                        <span class="end-time">${getEndTimeString(item.timer)}</span>
-                    </li>`;
+                    petsContainer.innerHTML += `
+                        <div class="progress-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-level">Cấp ${item.level}</span>
+                            </div>
+                            <div class="timer mb-1" data-time="${item.timer}">${formatTime(item.timer)}</div>
+                            <div class="end-time"><i class="fa-regular fa-clock me-1"></i>${getEndTimeString(item.timer)}</div>
+                        </div>`;
                 });
             }
         }
@@ -264,7 +395,7 @@
                     document.getElementById('json-input').value = savedObj.rawJson;
                     cocData = JSON.parse(savedObj.rawJson);
 
-                    // Tự động trừ bù khoảng thời gian đã trôi qua khi F5 lại trang
+                    // Khớp và tự động trừ lùi đúng số giây đã trôi qua kể từ lần lưu trước
                     const elapsedSeconds = Math.floor(Date.now() / 1000) - savedObj.saveTime;
                     
                     ['guardians', 'heroes', 'buildings', 'buildings2', 'units', 'units2', 'pets'].forEach(key => {
@@ -272,6 +403,17 @@
                             cocData[key].forEach(item => {
                                 if (item.timer && item.timer > 0) {
                                     item.timer = Math.max(0, item.timer - elapsedSeconds);
+                                }
+                                if (item.types) {
+                                    item.types.forEach(t => {
+                                        if (t.modules) {
+                                            t.modules.forEach(m => {
+                                                if (m.timer && m.timer > 0) {
+                                                    m.timer = Math.max(0, m.timer - elapsedSeconds);
+                                                }
+                                            });
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -284,7 +426,7 @@
             }
         };
 
-        // Đồng hồ đếm lùi thời gian thực mỗi giây
+        // Vòng lặp đếm ngược thời gian thực mỗi giây cho tất cả các bộ đếm
         setInterval(() => {
             document.querySelectorAll('.timer').forEach(el => {
                 let timeLeft = parseInt(el.getAttribute('data-time'));
