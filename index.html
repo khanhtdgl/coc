@@ -25,6 +25,12 @@
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
         
+        /* Bảng chọn trợ thủ gọn gàng */
+        .helpers-box { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .helper-item { flex: 1; background: #1c1c1e; padding: 10px; border-radius: 8px; border: 1px solid #3a3a3c; min-width: 140px; }
+        .helper-item label { display: block; font-size: 0.8rem; color: #8e8e93; margin-bottom: 5px; }
+        .helper-item select { width: 100%; padding: 6px; background: #2c2c2e; color: #fff; border: 1px solid #3a3a3c; border-radius: 6px; font-size: 0.9rem; outline: none; }
+
         .button-group { display: flex; gap: 8px; flex-wrap: wrap; }
         button { padding: 12px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; }
         
@@ -43,33 +49,22 @@
         .item-info { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
         .item-name { font-weight: 600; font-size: 1rem; color: #fff; }
 
-        /* Style mới cho phần thời gian: To hơn, có màu nền riêng biệt */
         .timer-box { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
         .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 12px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
         .timer.done { background: #27ae60; }
         
-        /* Khung ngày giờ hoàn thành được làm to và có màu nền riêng */
         .target-date { 
-            font-size: 0.85em; 
-            color: #f1c40f; 
-            background: rgba(241, 196, 15, 0.1); 
-            border: 1px solid rgba(241, 196, 15, 0.3); 
-            padding: 4px 10px; 
-            border-radius: 6px; 
-            font-weight: 600;
-            white-space: nowrap;
+            font-size: 0.85em; color: #f1c40f; background: rgba(241, 196, 15, 0.1); 
+            border: 1px solid rgba(241, 196, 15, 0.3); padding: 4px 10px; border-radius: 6px; font-weight: 600; white-space: nowrap;
         }
 
         .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important; width: 100%; text-align: center; }
-        
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
 
         .app-footer { margin-top: 30px; margin-bottom: 20px; text-align: center; }
         .btn-refresh-app {
-            background: transparent; color: #8e8e93;
-            border: 1px dashed #8e8e93; border-radius: 10px;
-            padding: 14px 20px; font-size: 14px; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+            background: transparent; color: #8e8e93; border: 1px dashed #8e8e93; border-radius: 10px;
+            padding: 14px 20px; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
         }
         .btn-refresh-app:active { background: #3a3a3c; }
     </style>
@@ -84,6 +79,39 @@
         <main>
             <section class="card input-section" id="input-section">
                 <textarea id="json-input" placeholder="Dán mã JSON để cập nhật tiến trình game..." rows="3"></textarea>
+                
+                <!-- BẢNG TÙY CHỈNH TRỢ THỦ HỌC VIỆC -->
+                <div class="helpers-box">
+                    <div class="helper-item">
+                        <label>👷 Thợ Xây Học Việc</label>
+                        <select id="builder-apprentice-lvl">
+                            <option value="0">Không dùng (0h/ngày)</option>
+                            <option value="1">Cấp 1 (-1h/ngày)</option>
+                            <option value="2">Cấp 2 (-2h/ngày)</option>
+                            <option value="3">Cấp 3 (-3h/ngày)</option>
+                            <option value="4">Cấp 4 (-4h/ngày)</option>
+                            <option value="5">Cấp 5 (-5h/ngày)</option>
+                            <option value="6">Cấp 6 (-6h/ngày)</option>
+                            <option value="7">Cấp 7 (-7h/ngày)</option>
+                            <option value="8" selected>Cấp 8 (-8h/ngày)</option>
+                        </select>
+                    </div>
+                    <div class="helper-item">
+                        <label>🧪 Phụ Tá Phòng Thí Nghiệm</label>
+                        <select id="lab-apprentice-lvl">
+                            <option value="0">Không dùng (0h/ngày)</option>
+                            <option value="1">Cấp 1 (-1h/ngày)</option>
+                            <option value="2">Cấp 2 (-2h/ngày)</option>
+                            <option value="3">Cấp 3 (-3h/ngày)</option>
+                            <option value="4">Cấp 4 (-4h/ngày)</option>
+                            <option value="5">Cấp 5 (-5h/ngày)</option>
+                            <option value="6">Cấp 6 (-6h/ngày)</option>
+                            <option value="7">Cấp 7 (-7h/ngày)</option>
+                            <option value="8" selected>Cấp 8 (-8h/ngày)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="button-group">
                     <button id="btn-paste" class="btn-info">📋 Dán mã</button>
                     <button id="btn-process" class="btn-primary">🚀 Chạy</button>
@@ -166,6 +194,8 @@
             upcoming: document.getElementById('upcoming-list'), builders: document.getElementById('builders-list'), 
             lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
             tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
+            builderApprentice: document.getElementById('builder-apprentice-lvl'),
+            labApprentice: document.getElementById('lab-apprentice-lvl'),
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
@@ -189,6 +219,17 @@
             }
         }
 
+        // THUẬT TOÁN TÍNH TỐC ĐỘ GIẢM TRỪ DO TRỢ THỦ HỌC VIỆC
+        // Mỗi cấp trợ thủ giảm N giờ/ngày, tương ứng hệ số rút ngắn thời gian là: (24 - N) / 24
+        function adjustTimerWithApprentice(timerSeconds, apprenticeLevel, isLab = false) {
+            if (apprenticeLevel <= 0) return timerSeconds;
+            // Tỷ lệ giảm trừ mỗi ngày (Cấp 8 giảm 8h/ngày tức là 1/3 thời gian)
+            const hoursReducedPerDay = parseInt(apprenticeLevel);
+            const ratio = (24 - hoursReducedPerDay) / 24;
+            // Chỉ áp dụng cho Thợ xây (đối với lab thì áp dụng cho lab assistant)
+            return Math.floor(timerSeconds * ratio);
+        }
+
         function processData(data) {
             clearUI(); 
             if (!data || typeof data !== 'object') {
@@ -199,6 +240,8 @@
             document.getElementById('input-section').style.display = 'none';
 
             const jsonTimestamp = data.timestamp || Math.floor(Date.now() / 1000);
+            const builderAppLvl = parseInt(ui.builderApprentice.value);
+            const labAppLvl = parseInt(ui.labApprentice.value);
 
             let buildersData = [], labData = [], petsData = [];
             if (data.buildings) extractTimers(data.buildings, buildersData);
@@ -210,18 +253,23 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            buildersData.sort((a, b) => a.timer - b.timer);
-            labData.sort((a, b) => a.timer - b.timer);
-            petsData.sort((a, b) => a.timer - b.timer);
+            // Áp dụng điều chỉnh thời gian do thợ học việc / phụ tá lab
+            buildersData.forEach(item => { item.adjustedTimer = adjustTimerWithApprentice(item.timer, builderAppLvl); });
+            petsData.forEach(item => { item.adjustedTimer = adjustTimerWithApprentice(item.timer, builderAppLvl); }); // Linh thú cũng tính vào thợ xây/nhà thú
+            labData.forEach(item => { item.adjustedTimer = adjustTimerWithApprentice(item.timer, labAppLvl, true); });
+
+            buildersData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            labData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            petsData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
 
             let allData = [...buildersData, ...labData, ...petsData];
-            let upcomingData = allData.filter(item => item.timer <= 86400).sort((a, b) => a.timer - b.timer);
+            let upcomingData = allData.filter(item => item.adjustedTimer <= 86400).sort((a, b) => a.adjustedTimer - b.adjustedTimer);
 
             function renderList(dataArray, targetUI, isMuted = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
-                    const endTime = jsonTimestamp + item.timer;
+                    const endTime = jsonTimestamp + item.adjustedTimer;
                     const dateStr = formatTargetDate(endTime);
 
                     li.innerHTML = `
@@ -294,6 +342,10 @@
             ui.input.focus();
         });
 
+        // Lưu lựa chọn cấp độ trợ thủ vào bộ nhớ
+        ui.builderApprentice.addEventListener('change', () => { localStorage.setItem('coc_builder_app', ui.builderApprentice.value); });
+        ui.labApprentice.addEventListener('change', () => { localStorage.setItem('coc_lab_app', ui.labApprentice.value); });
+
         document.getElementById('btn-refresh-app').addEventListener('click', async () => {
             const btn = document.getElementById('btn-refresh-app');
             btn.innerHTML = '⏳ Đang tải lại...';
@@ -324,6 +376,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('coc_builder_app')) ui.builderApprentice.value = localStorage.getItem('coc_builder_app');
+            if(localStorage.getItem('coc_lab_app')) ui.labApprentice.value = localStorage.getItem('coc_lab_app');
+
             const savedData = localStorage.getItem('saved_coc_json');
             if (savedData) { ui.input.value = savedData; handleJSON(savedData); }
         });
