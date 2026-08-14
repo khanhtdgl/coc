@@ -9,6 +9,7 @@
         body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .card { background-color: #1e1e1e; border: 1px solid #333; }
         .timer { font-family: monospace; font-weight: bold; color: #ffc107; font-size: 1.1em; }
+        .end-time { font-size: 0.85em; color: #a0a0a0; }
         textarea { background-color: #222 !important; color: #fff !important; border: 1px solid #444 !important; font-family: monospace; font-size: 12px; }
     </style>
 </head>
@@ -16,7 +17,6 @@
     <div class="container">
         <h1 class="text-center mb-3 text-warning">🛡️ CoC Progress Tracker</h1>
         
-        <!-- Khung dán JSON -->
         <div class="card p-3 mb-4 shadow">
             <h5 class="text-info mb-2">📋 Dán dữ liệu JSON vào đây:</h5>
             <textarea id="json-input" class="form-control mb-2" rows="4" placeholder="Dán đoạn JSON tài khoản của bạn vào đây..."></textarea>
@@ -26,7 +26,6 @@
         <p class="text-center text-muted mb-4">Player Tag: <span id="player-tag" class="text-white fw-bold">Chưa có</span></p>
 
         <div class="row g-4">
-            <!-- Thợ xây & Công trình / Tướng đang nâng cấp -->
             <div class="col-md-4">
                 <div class="card p-3 h-100 shadow">
                     <h4 class="text-info border-bottom pb-2">👷 Thợ Xây / Công Trình & Tướng</h4>
@@ -36,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- Phòng thí nghiệm -->
             <div class="col-md-4">
                 <div class="card p-3 h-100 shadow">
                     <h4 class="text-info border-bottom pb-2">🧪 Phòng Thí Nghiệm</h4>
@@ -46,7 +44,6 @@
                 </div>
             </div>
 
-            <!-- Linh thú / Pets -->
             <div class="col-md-4">
                 <div class="card p-3 h-100 shadow">
                     <h4 class="text-info border-bottom pb-2">🐾 Chuồng Linh Thú</h4>
@@ -75,6 +72,12 @@
             return res;
         }
 
+        function getEndTimeString(seconds) {
+            if (!seconds || seconds <= 0) return "";
+            const endTime = new Date(Date.now() + seconds * 1000);
+            return `📅 Kết thúc lúc: ${endTime.toLocaleDateString('vi-VN')} ${endTime.toLocaleTimeString('vi-VN')}`;
+        }
+
         function loadDataFromInput() {
             const rawText = document.getElementById('json-input').value.trim();
             if (!rawText) {
@@ -83,7 +86,14 @@
             }
             try {
                 cocData = JSON.parse(rawText);
-                localStorage.setItem('coc_saved_json', rawText);
+                
+                // Lưu kèm timestamp lúc bấm cập nhật để khi F5 trang không bị đếm lại từ đầu
+                const storageObj = {
+                    saveTime: Math.floor(Date.now() / 1000),
+                    rawJson: rawText
+                };
+                localStorage.setItem('coc_saved_data', JSON.stringify(storageObj));
+                
                 renderTrackers();
             } catch (e) {
                 alert('Lỗi định dạng JSON! Hãy kiểm tra lại đoạn mã.');
@@ -91,112 +101,99 @@
             }
         }
 
+        function processActiveItems(list, namePrefix) {
+            let items = [];
+            if (list) {
+                list.forEach(item => {
+                    if (item.timer && item.timer > 0) {
+                        items.push({ 
+                            name: `${namePrefix} (ID: ${item.data})`, 
+                            level: item.lvl, 
+                            timer: item.timer 
+                        });
+                    }
+                });
+            }
+            return items;
+        }
+
+        function renderList(elementId, items) {
+            const ul = document.getElementById(elementId);
+            ul.innerHTML = '';
+            
+            if (items.length === 0) {
+                ul.innerHTML = '<li class="text-muted">Không có mục nào đang nâng cấp.</li>';
+                return;
+            }
+
+            // Sắp xếp thời gian ngắn nhất lên trên (timer tăng dần)
+            items.sort((a, b) => a.timer - b.timer);
+
+            items.forEach(item => {
+                ul.innerHTML += `<li class="mb-3 border-bottom pb-2">
+                    <strong>${item.name}</strong><br>
+                    ⬆️ Cấp: ${item.level}<br>
+                    ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
+                    <span class="end-time">${getEndTimeString(item.timer)}</span>
+                </li>`;
+            });
+        }
+
         function renderTrackers() {
             if (!cocData) return;
             document.getElementById('player-tag').innerText = cocData.tag || "Không rõ";
 
-            // 1. Quét tất cả các mục có timer trong Guardians, Heroes, Buildings... (Thợ xây)
-            const buildersUl = document.getElementById('builders-list');
-            buildersUl.innerHTML = '';
-            let activeItems = [];
-            
-            if (cocData.guardians) {
-                cocData.guardians.forEach(g => {
-                    if (g.timer && g.timer > 0) {
-                        activeItems.push({ name: `Hộ vệ / Công trình đặc biệt (ID: ${g.data})`, level: g.lvl, timer: g.timer });
-                    }
-                });
-            }
-            if (cocData.heroes) {
-                cocData.heroes.forEach(h => {
-                    if (h.timer && h.timer > 0) {
-                        activeItems.push({ name: `Tướng (Hero ID: ${h.data})`, level: h.lvl, timer: h.timer });
-                    }
-                });
-            }
-            if (cocData.buildings) {
-                cocData.buildings.forEach(b => {
-                    if (b.timer && b.timer > 0) {
-                        activeItems.push({ name: `Công trình (ID: ${b.data})`, level: b.lvl, timer: b.timer });
-                    }
-                });
-            }
+            // Gom tất cả các mục có thể dùng thợ xây (buildings, heroes, guardians, buildings2...)
+            let builderItems = [
+                ...processActiveItems(cocData.guardians, 'Hộ vệ'),
+                ...processActiveItems(cocData.heroes, 'Tướng'),
+                ...processActiveItems(cocData.buildings, 'Công trình'),
+                ...processActiveItems(cocData.buildings2, 'Công trình BH')
+            ];
+            renderList('builders-list', builderItems);
 
-            if (activeItems.length === 0) {
-                buildersUl.innerHTML = '<li class="text-muted">Tất cả thợ xây đang rảnh rỗi.</li>';
-            } else {
-                activeItems.forEach(item => {
-                    buildersUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span>
-                    </li>`;
-                });
-            }
+            // Phòng thí nghiệm (units, spells, units2)
+            let labItems = [
+                ...processActiveItems(cocData.units, 'Nghiên cứu Lính'),
+                ...processActiveItems(cocData.spells, 'Nghiên cứu Phép'),
+                ...processActiveItems(cocData.units2, 'Nghiên cứu Lính BH')
+            ];
+            renderList('lab-list', labItems);
 
-            // 2. Phòng thí nghiệm (Units / Spells đang nghiên cứu có timer)
-            const labUl = document.getElementById('lab-list');
-            labUl.innerHTML = '';
-            let labItems = [];
-            if (cocData.units) {
-                cocData.units.forEach(u => {
-                    if (u.timer && u.timer > 0) {
-                        labItems.push({ name: `Nghiên cứu Lính (ID: ${u.data})`, level: u.lvl, timer: u.timer });
-                    }
-                });
-            }
-            if (cocData.spells) {
-                cocData.spells.forEach(s => {
-                    if (s.timer && s.timer > 0) {
-                        labItems.push({ name: `Nghiên cứu Phép (ID: ${s.data})`, level: s.lvl, timer: s.timer });
-                    }
-                });
-            }
-
-            if (labItems.length === 0) {
-                labUl.innerHTML = '<li class="text-muted">Phòng thí nghiệm đang trống.</li>';
-            } else {
-                labItems.forEach(item => {
-                    labUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span>
-                    </li>`;
-                });
-            }
-
-            // 3. Linh thú (Pets)
-            const petsUl = document.getElementById('pets-list');
-            petsUl.innerHTML = '';
-            let petItems = [];
-            if (cocData.pets) {
-                cocData.pets.forEach(p => {
-                    if (p.timer && p.timer > 0) {
-                        petItems.push({ name: `Linh thú (ID: ${p.data})`, level: p.lvl, timer: p.timer });
-                    }
-                });
-            }
-            if (petItems.length === 0) {
-                petsUl.innerHTML = '<li class="text-muted">Không có linh thú nào đang nâng cấp.</li>';
-            } else {
-                petItems.forEach(item => {
-                    petsUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                        <strong>${item.name}</strong><br>
-                        ⬆️ Cấp: ${item.level}<br>
-                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span>
-                    </li>`;
-                });
-            }
+            // Linh thú (pets)
+            let petItems = processActiveItems(cocData.pets, 'Linh thú');
+            renderList('pets-list', petItems);
         }
 
         window.onload = function() {
-            const saved = localStorage.getItem('coc_saved_json');
-            if (saved) {
-                document.getElementById('json-input').value = saved;
-                loadDataFromInput();
+            const savedDataStr = localStorage.getItem('coc_saved_data');
+            if (savedDataStr) {
+                try {
+                    const savedObj = JSON.parse(savedDataStr);
+                    document.getElementById('json-input').value = savedObj.rawJson;
+                    cocData = JSON.parse(savedObj.rawJson);
+
+                    // Tự động trừ bớt thời gian đã trôi qua kể từ lần lưu cuối để F5 không bị reset ngược thời gian
+                    const elapsedSeconds = Math.floor(Date.now() / 1000) - savedObj.saveTime;
+                    
+                    ['guardians', 'heroes', 'buildings', 'buildings2', 'units', 'spells', 'units2', 'pets'].forEach(key => {
+                        if (cocData[key]) {
+                            cocData[key].forEach(item => {
+                                if (item.timer && item.timer > 0) {
+                                    item.timer = Math.max(0, item.timer - elapsedSeconds);
+                                }
+                            });
+                        }
+                    });
+
+                    renderTrackers();
+                } catch (e) {
+                    console.error(e);
+                }
             }
         };
 
+        // Đếm lùi thời gian thực mỗi giây
         setInterval(() => {
             document.querySelectorAll('.timer').forEach(el => {
                 let timeLeft = parseInt(el.getAttribute('data-time'));
