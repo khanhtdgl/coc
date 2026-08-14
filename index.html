@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tiến Trình Nâng Cấp - CoC</title>
+    <title>Trạm Nâng Cấp - CoC</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="apple-touch-icon" href="icon.png">
@@ -25,6 +25,30 @@
         
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
+        
+        .helper-card { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .helper-card.lab-card { border-color: #9b59b6; }
+        .helper-card.lab-card .helper-title h3 { color: #af7ac5; }
+        
+        .helper-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .helper-title h3 { color: #f39c12; font-size: 1.1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .helper-title p { font-size: 0.8rem; color: #bbb; }
+        
+        .helper-stats { display: flex; gap: 10px; align-items: center; }
+        .helper-box { background: #2c2c2e; border: 1px solid #4a4a4c; padding: 6px 10px; border-radius: 8px; text-align: center; min-width: 110px; }
+        .helper-box .label { font-size: 0.65rem; color: #aaa; display: block; }
+        .helper-box .value { font-size: 0.85rem; font-weight: bold; color: #f1c40f; }
+
+        .helper-row { display: flex; align-items: center; justify-content: space-between; background: #2c2c2e; padding: 10px; border-radius: 8px; border: 1px solid #4a4a4c; gap: 10px; flex-wrap: wrap; }
+        .helper-row label { font-size: 0.85rem; color: #f39c12; font-weight: bold; }
+        .lab-card .helper-row label { color: #af7ac5; }
+
+        .time-inputs { display: flex; gap: 5px; align-items: center; }
+        .time-inputs input { width: 55px; padding: 6px; background: #1c1c1e; color: #fff; border: 1px solid #4a4a4c; border-radius: 6px; font-size: 0.85rem; text-align: center; outline: none; }
+        .time-inputs span { font-size: 0.85rem; color: #aaa; }
+
+        .btn-action { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; white-space: nowrap; }
+        .btn-action:disabled { background: #555; color: #888; cursor: not-allowed; }
 
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
@@ -38,6 +62,9 @@
 
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
+        
+        .item-list li.has-helper { border-left-color: #e67e22; background: rgba(230, 126, 34, 0.08); }
+        .item-list li.has-lab-helper { border-left-color: #9b59b6; background: rgba(155, 89, 182, 0.08); }
 
         #upcoming-list li { border-left-color: #e67e22; }
         #builders-list li { border-left-color: #f39c12; }
@@ -46,6 +73,18 @@
 
         .item-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .item-name { font-weight: 600; font-size: 0.95rem; color: #fff; }
+
+        .saved-time { font-size: 0.75rem; color: #e67e22; font-weight: bold; display: none; }
+        .has-helper .saved-time, .has-lab-helper .saved-time { display: inline-block; }
+
+        .btn-item-action {
+            background: #2c2c2e; color: #8e8e93; border: 1px solid #4a4a4c; border-radius: 6px;
+            padding: 4px 8px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+            transition: 0.2s; white-space: nowrap; margin-top: 4px;
+        }
+        .btn-item-action.active { background: #e67e22; color: #fff; border-color: #f39c12; font-weight: bold; }
+        .lab-card-item .btn-item-action.active { background: #9b59b6; border-color: #af7ac5; }
+        .btn-item-action:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .timer-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
         .timer { color: #fff; font-size: 0.85em; background: #e74c3c; padding: 5px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
@@ -82,6 +121,68 @@
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
+
+            <!-- THỢ XÂY HỌC VIỆC CẤP 8 -->
+            <div class="helper-card">
+                <div class="helper-top">
+                    <div class="helper-title">
+                        <h3>👷 Thợ Xây Học Việc (Cấp 8)</h3>
+                        <p>Tăng tốc x8 trong 1 giờ làm việc, hồi chiêu 23 giờ</p>
+                    </div>
+                    <div class="helper-stats">
+                        <div class="helper-box">
+                            <span class="label">Trạng thái</span>
+                            <span class="value" id="builder-status">Khả dụng</span>
+                        </div>
+                        <div class="helper-box">
+                            <span class="label">Hồi chiêu</span>
+                            <span class="value" id="builder-cooldown">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="helper-row">
+                    <div class="time-inputs">
+                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian:</label>
+                        <input type="number" id="b-h" placeholder="Giờ" min="0"><span>h</span>
+                        <input type="number" id="b-m" placeholder="Phút" min="0" max="59"><span>m</span>
+                        <input type="number" id="b-s" placeholder="Giây" min="0" max="59"><span>s</span>
+                        <button id="b-set-btn" class="btn-action" style="background: #2980b9; padding: 4px 8px; margin-left: 5px;">Đặt</button>
+                    </div>
+                    <button id="b-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset ngày mới</button>
+                </div>
+            </div>
+
+            <!-- PHỤ TÁ PHÒNG THÍ NGHIỆM CẤP 8 -->
+            <div class="helper-card lab-card">
+                <div class="helper-top">
+                    <div class="helper-title">
+                        <h3>🧪 Phụ Tá Phòng Thí Nghiệm (Cấp 8)</h3>
+                        <p>Tăng tốc x8 trong 1 giờ nghiên cứu, hồi chiêu 23 giờ</p>
+                    </div>
+                    <div class="helper-stats">
+                        <div class="helper-box" style="border-color:#af7ac5;">
+                            <span class="label">Trạng thái</span>
+                            <span class="value" id="lab-status" style="color:#af7ac5;">Khả dụng</span>
+                        </div>
+                        <div class="helper-box" style="border-color:#af7ac5;">
+                            <span class="label">Hồi chiêu</span>
+                            <span class="value" id="lab-cooldown" style="color:#af7ac5;">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="helper-row">
+                    <div class="time-inputs">
+                        <label style="font-size: 0.8rem; color:#aaa; margin-right:5px;">Sửa thời gian:</label>
+                        <input type="number" id="l-h" placeholder="Giờ" min="0"><span>h</span>
+                        <input type="number" id="l-m" placeholder="Phút" min="0" max="59"><span>m</span>
+                        <input type="number" id="l-s" placeholder="Giây" min="0" max="59"><span>s</span>
+                        <button id="l-set-btn" class="btn-action" style="background: #8e44ad; padding: 4px 8px; margin-left: 5px;">Đặt</button>
+                    </div>
+                    <button id="l-reset-btn" class="btn-action" style="background: #e74c3c; padding: 4px 8px;">Reset ngày mới</button>
+                </div>
+            </div>
 
             <section class="card card-hot">
                 <h2>🔥 Xong trong 24h tới <span id="upcoming-count" class="badge" style="background:#e67e22;">0</span></h2>
@@ -122,18 +223,18 @@
         }
 
         function formatTimeRealtime(seconds) {
-            if (seconds <= 0) return "Xong! 🎉";
-            const days = Math.floor(seconds / (3600 * 24));
-            const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            
-            let timeParts = [];
-            if (days > 0) timeParts.push(`${days}d`);
-            if (hours > 0) timeParts.push(`${hours}h`);
-            if (mins > 0) timeParts.push(`${mins}m`);
-            timeParts.push(`${secs}s`);
-            return timeParts.join(' ');
+            if (seconds <= 0) return "Sẵn sàng! 🎉";
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function formatSavedTime(diff) {
+            if (diff <= 0) return "";
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            return `⏱️ Tiết kiệm do x8 (1h): ${h > 0 ? h + 'h ' : ''}${m}m`;
         }
 
         function formatTargetDate(endTimeInSeconds) {
@@ -143,15 +244,36 @@
         }
 
         const ui = {
-            upcoming: document.getElementById('upcoming-list'), builders: document.getElementById('builders-list'), 
-            lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
-            tag: document.getElementById('player-tag'), error: document.getElementById('error-msg'), input: document.getElementById('json-input'),
+            upcoming: document.getElementById('upcoming-list'), 
+            builders: document.getElementById('builders-list'), 
+            lab: document.getElementById('lab-list'), 
+            pets: document.getElementById('pets-list'),
+            tag: document.getElementById('player-tag'), 
+            error: document.getElementById('error-msg'), 
+            input: document.getElementById('json-input'),
             section: document.getElementById('input-section'),
+            
+            builderStatus: document.getElementById('builder-status'),
+            builderCooldown: document.getElementById('builder-cooldown'),
+            bH: document.getElementById('b-h'), bM: document.getElementById('b-m'), bS: document.getElementById('b-s'),
+
+            labStatus: document.getElementById('lab-status'),
+            labCooldown: document.getElementById('lab-cooldown'),
+            lH: document.getElementById('l-h'), lM: document.getElementById('l-m'), lS: document.getElementById('l-s'),
+
             counts: { upcoming: document.getElementById('upcoming-count'), builders: document.getElementById('builder-count'), lab: document.getElementById('lab-count'), pets: document.getElementById('pet-count') }
         };
 
         let activeTimers = []; 
         let countdownInterval = null;
+
+        let builderCd = 0;       
+        let builderWorkRem = 0;  
+        let selectedBuilderId = null; 
+
+        let labCd = 0;
+        let labWorkRem = 0;
+        let selectedLabId = null;
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -170,10 +292,23 @@
             }
         }
 
+        function calculateX8Time(timerSeconds) {
+            return Math.max(0, timerSeconds - (7 * 3600));
+        }
+
         let globalGameData = null;
 
         function processData(data) {
             globalGameData = data;
+            
+            if (localStorage.getItem('coc_b_cd')) builderCd = parseInt(localStorage.getItem('coc_b_cd'));
+            if (localStorage.getItem('coc_b_work')) builderWorkRem = parseInt(localStorage.getItem('coc_b_work'));
+            if (localStorage.getItem('coc_b_sel')) selectedBuilderId = localStorage.getItem('coc_b_sel');
+
+            if (localStorage.getItem('coc_l_cd')) labCd = parseInt(localStorage.getItem('coc_l_cd'));
+            if (localStorage.getItem('coc_l_work')) labWorkRem = parseInt(localStorage.getItem('coc_l_work'));
+            if (localStorage.getItem('coc_l_sel')) selectedLabId = localStorage.getItem('coc_l_sel');
+
             renderAllSections();
         }
 
@@ -200,23 +335,74 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            buildersData.sort((a, b) => a.timer - b.timer);
-            labData.sort((a, b) => a.timer - b.timer);
-            petsData.sort((a, b) => a.timer - b.timer);
+            const isBuilderWorking = builderWorkRem > 0;
+            const isLabWorking = labWorkRem > 0;
+
+            buildersData.forEach(item => {
+                item.originalTimer = item.timer;
+                let t = item.timer;
+                if (isBuilderWorking && item.data == selectedBuilderId) {
+                    t = calculateX8Time(t);
+                }
+                item.adjustedTimer = t;
+            });
+
+            labData.forEach(item => {
+                item.originalTimer = item.timer;
+                let t = item.timer;
+                if (isLabWorking && item.data == selectedLabId) {
+                    t = calculateX8Time(t);
+                }
+                item.adjustedTimer = t;
+            });
+            
+            petsData.forEach(item => {
+                item.originalTimer = item.timer;
+                item.adjustedTimer = item.timer;
+            });
+
+            buildersData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            labData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
+            petsData.sort((a, b) => a.adjustedTimer - b.adjustedTimer);
 
             let allData = [...buildersData, ...labData, ...petsData];
-            let upcomingData = allData.filter(item => item.timer <= 86400).sort((a, b) => a.timer - b.timer);
+            let upcomingData = allData.filter(item => item.adjustedTimer <= 86400).sort((a, b) => a.adjustedTimer - b.adjustedTimer);
 
-            function renderList(dataArray, targetUI, isMuted = false) {
+            function renderList(dataArray, targetUI, isMuted = false, isLabList = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
-                    const endTime = jsonTimestamp + item.timer;
+                    const endTime = jsonTimestamp + item.adjustedTimer;
                     const dateStr = formatTargetDate(endTime);
+                    
+                    const isSelected = isLabList ? (item.data == selectedLabId) : (item.data == selectedBuilderId);
+                    const isActiveWork = isLabList ? isLabWorking : isBuilderWorking;
+                    const isAssigned = isSelected && isActiveWork;
+
+                    const savedTimeStr = formatSavedTime(item.originalTimer, item.adjustedTimer);
+
+                    if (isAssigned) {
+                        if (isLabList) li.classList.add('has-lab-helper');
+                        else li.classList.add('has-helper');
+                    }
+
+                    let btnText = isLabList ? "🧪 Gán Phụ Tá" : "👷 Gán Thợ Học Việc";
+                    if (isAssigned) {
+                        btnText = isLabList ? "🧪 Đang Tăng Tốc (x8)" : "👷 Đang Làm Việc (x8)";
+                    }
+
+                    const helperBtnHTML = `
+                        <button class="btn-item-action ${isAssigned ? 'active' : ''}" 
+                            onclick="${isLabList ? 'selectLabItem' : 'selectBuilderItem'}(${item.data})">
+                            ${btnText}
+                        </button>
+                    `;
 
                     li.innerHTML = `
                         <div class="item-info">
                             <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
+                            <span class="saved-time">${isAssigned ? savedTimeStr + ' ⚡(Đang x8)' : ''}</span>
+                            ${helperBtnHTML}
                         </div>
                         <div class="timer-box">
                             <span class="timer">Đang tính...</span>
@@ -236,10 +422,10 @@
                 });
             }
 
-            renderList(upcomingData, ui.upcoming, true);
-            renderList(buildersData, ui.builders, false);
-            renderList(labData, ui.lab, false);
-            renderList(petsData, ui.pets, false);
+            renderList(upcomingData, ui.upcoming, true, false);
+            renderList(buildersData, ui.builders, false, false);
+            renderList(labData, ui.lab, false, true);
+            renderList(petsData, ui.pets, false, false);
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
@@ -251,14 +437,143 @@
             if (labData.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Tắt đèn...</li>";
             if (petsData.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Trống...</li>";
 
+            updateStatusAndInputs();
             startRealtimeCountdown();
         }
+
+        window.selectBuilderItem = function(id) {
+            if (builderCd > 0 && builderWorkRem <= 0) {
+                alert("Thợ xây học việc đang trong thời gian hồi chiêu!");
+                return;
+            }
+            selectedBuilderId = id;
+            localStorage.setItem('coc_b_sel', selectedBuilderId);
+
+            if (builderWorkRem <= 0 && builderCd <= 0) {
+                builderWorkRem = 3600; 
+                builderCd = 23 * 3600;  
+                localStorage.setItem('coc_b_work', builderWorkRem);
+                localStorage.setItem('coc_b_cd', builderCd);
+            }
+            renderAllSections();
+        };
+
+        window.selectLabItem = function(id) {
+            if (labCd > 0 && labWorkRem <= 0) {
+                alert("Phụ tá Lab đang trong thời gian hồi chiêu!");
+                return;
+            }
+            selectedLabId = id;
+            localStorage.setItem('coc_l_sel', selectedLabId);
+
+            if (labWorkRem <= 0 && labCd <= 0) {
+                labWorkRem = 3600; 
+                labCd = 23 * 3600;  
+                localStorage.setItem('coc_l_work', labWorkRem);
+                localStorage.setItem('coc_l_cd', labCd);
+            }
+            renderAllSections();
+        };
+
+        function updateStatusAndInputs() {
+            if (builderWorkRem > 0) {
+                ui.builderStatus.textContent = "Đang làm việc (x8)";
+                ui.builderStatus.style.color = "#27ae60";
+            } else if (builderCd > 0) {
+                ui.builderStatus.textContent = "Đang hồi chiêu";
+                ui.builderStatus.style.color = "#e67e22";
+            } else {
+                ui.builderStatus.textContent = "Khả dụng";
+                ui.builderStatus.style.color = "#f1c40f";
+            }
+            ui.builderCooldown.textContent = formatTimeRealtime(builderCd > 0 ? builderCd : 0);
+
+            ui.bH.value = Math.floor(builderCd / 3600);
+            ui.bM.value = Math.floor((builderCd % 3600) / 60);
+            ui.bS.value = builderCd % 60;
+
+            if (labWorkRem > 0) {
+                ui.labStatus.textContent = "Đang nghiên cứu (x8)";
+                ui.labStatus.style.color = "#27ae60";
+            } else if (labCd > 0) {
+                ui.labStatus.textContent = "Đang hồi chiêu";
+                ui.labStatus.style.color = "#e67e22";
+            } else {
+                ui.labStatus.textContent = "Khả dụng";
+                ui.labStatus.style.color = "#f1c40f";
+            }
+            ui.labCooldown.textContent = formatTimeRealtime(labCd > 0 ? labCd : 0);
+
+            ui.lH.value = Math.floor(labCd / 3600);
+            ui.lM.value = Math.floor((labCd % 3600) / 60);
+            ui.lS.value = labCd % 60;
+        }
+
+        document.getElementById('b-set-btn').addEventListener('click', () => {
+            const h = parseInt(ui.bH.value) || 0;
+            const m = parseInt(ui.bM.value) || 0;
+            const s = parseInt(ui.bS.value) || 0;
+            builderCd = (h * 3600) + (m * 60) + s;
+            localStorage.setItem('coc_b_cd', builderCd);
+            renderAllSections();
+            alert("Đã cập nhật hồi chiêu Thợ Xây!");
+        });
+
+        document.getElementById('b-reset-btn').addEventListener('click', () => {
+            builderCd = 0;
+            builderWorkRem = 0;
+            localStorage.setItem('coc_b_cd', 0);
+            localStorage.setItem('coc_b_work', 0);
+            renderAllSections();
+        });
+
+        document.getElementById('l-set-btn').addEventListener('click', () => {
+            const h = parseInt(ui.lH.value) || 0;
+            const m = parseInt(ui.lM.value) || 0;
+            const s = parseInt(ui.lS.value) || 0;
+            labCd = (h * 3600) + (m * 60) + s;
+            localStorage.setItem('coc_l_cd', labCd);
+            renderAllSections();
+            alert("Đã cập nhật hồi chiêu Phụ Tá Lab!");
+        });
+
+        document.getElementById('l-reset-btn').addEventListener('click', () => {
+            labCd = 0;
+            labWorkRem = 0;
+            localStorage.setItem('coc_l_cd', 0);
+            localStorage.setItem('coc_l_work', 0);
+            renderAllSections();
+        });
 
         function startRealtimeCountdown() {
             if (countdownInterval) clearInterval(countdownInterval);
 
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
+
+                if (builderWorkRem > 0) {
+                    builderWorkRem--;
+                    localStorage.setItem('coc_b_work', builderWorkRem);
+                    if (builderWorkRem <= 0) renderAllSections();
+                }
+                if (builderCd > 0) {
+                    builderCd--;
+                    localStorage.setItem('coc_b_cd', builderCd);
+                    ui.builderCooldown.textContent = formatTimeRealtime(builderCd);
+                }
+
+                if (labWorkRem > 0) {
+                    labWorkRem--;
+                    localStorage.setItem('coc_l_work', labWorkRem);
+                    if (labWorkRem <= 0) renderAllSections();
+                }
+                if (labCd > 0) {
+                    labCd--;
+                    localStorage.setItem('coc_l_cd', labCd);
+                    ui.labCooldown.textContent = formatTimeRealtime(labCd);
+                }
+
+                updateStatusAndInputs();
 
                 activeTimers.forEach(task => {
                     if (task.isDone) return;
@@ -331,6 +646,8 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('coc_b_sel')) selectedBuilderId = localStorage.getItem('coc_b_sel');
+            if(localStorage.getItem('coc_l_sel')) selectedLabId = localStorage.getItem('coc_l_sel');
             loadGameData();
         });
     </script>
