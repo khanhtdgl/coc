@@ -33,16 +33,20 @@
         .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
 
         .item-list { list-style: none; }
-        .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
+        .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 8px;}
         
         #upcoming-list li { border-left-color: #e67e22; }
         #builders-list li { border-left-color: #f39c12; }
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; min-width: 110px;}
+        /* Style gọn gàng cho phần hiển thị thời gian */
+        .timer-box { text-align: right; }
+        .timer { color: #fff; font-size: 0.85em; background: #e74c3c; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
         .timer.done { background: #27ae60; }
-        .item-name { font-weight: 500; }
+        .target-date { display: block; font-size: 0.75em; color: #8e8e93; margin-top: 3px; }
+
+        .item-name { font-weight: 500; font-size: 0.95em; }
         .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
@@ -139,6 +143,13 @@
             return `⏳ ${timeParts.join(' ')}`;
         }
 
+        // Hàm chuyển đổi thời gian kết thúc sang định dạng ngày tháng giờ gọn gàng
+        function formatTargetDate(endTimeInSeconds) {
+            const date = new Date(endTimeInSeconds * 1000);
+            const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+            return date.toLocaleDateString('vi-VN', options);
+        }
+
         const ui = {
             upcoming: document.getElementById('upcoming-list'), builders: document.getElementById('builders-list'), 
             lab: document.getElementById('lab-list'), pets: document.getElementById('pets-list'),
@@ -198,21 +209,30 @@
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
-                    li.innerHTML = `<span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> <span class="timer">Đang tính...</span>`;
+                    const endTime = jsonTimestamp + item.timer;
+                    const dateStr = formatTargetDate(endTime);
+
+                    li.innerHTML = `
+                        <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> 
+                        <div class="timer-box">
+                            <span class="timer">Đang tính...</span>
+                            <span class="target-date">📅 ${dateStr}</span>
+                        </div>
+                    `;
                     targetUI.appendChild(li);
 
-                    // THÊM CỜ MỚI: isDone để tránh lỗi đơ đồng hồ, isMuted để tắt chuông
                     activeTimers.push({ 
                         name: itemName, 
-                        endTime: jsonTimestamp + item.timer, 
+                        endTime: endTime, 
                         domElement: li.querySelector('.timer'), 
+                        dateElement: li.querySelector('.target-date'),
                         isDone: false,
                         isMuted: isMuted 
                     });
                 });
             }
 
-            renderList(upcomingData, ui.upcoming, true); // true = Tắt chuông ở bảng này
+            renderList(upcomingData, ui.upcoming, true);
             renderList(buildersData, ui.builders, false);
             renderList(labData, ui.lab, false);
             renderList(petsData, ui.pets, false);
@@ -230,25 +250,23 @@
             startRealtimeCountdown();
         }
 
-        // ĐÃ SỬA LẠI HÀM NÀY: Đồng hồ sẽ chạy đều cho tất cả mọi bảng
         function startRealtimeCountdown() {
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
                 
                 activeTimers.forEach(task => {
-                    if (task.isDone) return; // Đã xong thì bỏ qua không đếm nữa
+                    if (task.isDone) return;
                     
                     const remainingSeconds = task.endTime - now;
                     
                     if (remainingSeconds > 0) {
                         task.domElement.textContent = formatTimeRealtime(remainingSeconds);
                     } else {
-                        // KHI HẾT GIỜ
                         task.isDone = true;
                         task.domElement.textContent = "Xong! 🎉";
                         task.domElement.classList.add('done');
+                        if(task.dateElement) task.dateElement.style.display = 'none';
                         
-                        // Nếu chưa bị tắt chuông thì mới bật thông báo đẩy
                         if (!task.isMuted && "Notification" in window && Notification.permission === "granted") {
                             new Notification("Hoàn thành nâng cấp!", { body: `${task.name} đã nâng cấp xong!` });
                         }
