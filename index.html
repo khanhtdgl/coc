@@ -8,9 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: #1e293b;
-            --border-color: #334155;
+            --bg-dark: #0b0f19;
+            --card-bg: #151c2c;
+            --border-color: #26334d;
             --coc-gold: #f59e0b;
             --coc-blue: #38bdf8;
             --text-main: #f8fafc;
@@ -26,8 +26,8 @@
         .card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
         }
         .header-title {
             background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -36,12 +36,12 @@
             font-weight: 800;
         }
         textarea.json-box {
-            background-color: #0f172a !important;
+            background-color: #0b0f19 !important;
             color: #38bdf8 !important;
             border: 1px solid var(--border-color) !important;
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
-            border-radius: 8px;
+            border-radius: 10px;
         }
         .timer {
             font-family: monospace;
@@ -55,13 +55,17 @@
             display: inline-block;
         }
         .progress-item {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(11, 15, 25, 0.7);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: 10px;
+            padding: 14px 16px;
             margin-bottom: 12px;
+            transition: border-color 0.2s;
         }
-        .item-name { font-weight: 600; font-size: 1.05rem; color: #e2e8f0; }
+        .progress-item:hover {
+            border-color: #475569;
+        }
+        .item-name { font-weight: 600; font-size: 1.05rem; color: #f1f5f9; }
         .item-level {
             background: #334155;
             color: #cbd5e1;
@@ -76,6 +80,7 @@
             border: none;
             color: #000;
             font-weight: 700;
+            border-radius: 10px;
         }
         .btn-coc:hover { opacity: 0.9; color: #000; }
     </style>
@@ -96,7 +101,7 @@
         </div>
 
         <div class="row g-4">
-            <!-- Thợ xây -->
+            <!-- Thợ xây (Đúng 6 thợ xây công trình/tướng) -->
             <div class="col-lg-4">
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
@@ -114,7 +119,7 @@
                 <div class="card p-4 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
                         <h4 class="text-info m-0 fs-5"><i class="fa-solid fa-flask-vial me-2"></i> Phòng Thí Nghiệm</h4>
-                        <span id="lab-count-badge" class="badge bg-info text-dark fw-bold fs-6">Lab</span>
+                        <span class="badge bg-info text-dark fw-bold fs-6">Lab</span>
                     </div>
                     <div id="lab-list">
                         <div class="text-muted text-center py-4">Phòng thí nghiệm đang trống.</div>
@@ -140,10 +145,10 @@
     <script>
         let cocData = null;
 
-        // Ánh xạ ID chuẩn xác tuyệt đối (Thợ săn tướng ID 28000007 nằm ở phần Lab/Units)
+        // Từ điển tên định danh chính xác theo ID trong game của bạn
         const nameMapping = {
-            28000000: "Man di Vương (Minion Prince)",
-            28000007: "Thợ săn Tường", // Đã chuyển sang Phòng Thí Nghiệm
+            28000000: "Man di Vương",
+            28000007: "Thợ săn Tường",
             107000001: "Kẻ hủy diệt (Monolith)",
             107000008: "Máy ném bánh (Spell Tower)",
             1000011: "Tháp Pháp sư",
@@ -198,7 +203,7 @@
 
             let builderItems = [];
 
-            // 1. Quét Tướng / Heroes đang nâng cấp có timer (LỌC BỎ ID 28000007 vì đây là Thợ săn tướng ở phòng Lab)
+            // 1. Thợ xây: Chỉ lấy Heroes (trừ ID 28000007 là thợ săn tường ở Lab), Guardians và Buildings chính
             if (cocData.heroes) {
                 cocData.heroes.forEach(h => {
                     if (h.timer && h.timer > 0 && h.data !== 28000007) {
@@ -207,7 +212,6 @@
                 });
             }
 
-            // 2. Quét Hộ vệ / Guardians đang nâng cấp có timer
             if (cocData.guardians) {
                 cocData.guardians.forEach(g => {
                     if (g.timer && g.timer > 0) {
@@ -216,27 +220,14 @@
                 });
             }
 
-            // 3. Quét Buildings chính đang nâng cấp có timer
             if (cocData.buildings) {
                 cocData.buildings.forEach(b => {
                     if (b.timer && b.timer > 0) {
                         builderItems.push({ name: nameMapping[b.data] || `Công trình (ID: ${b.data})`, level: b.lvl, timer: b.timer });
                     }
-                    if (b.types) {
-                        b.types.forEach(t => {
-                            if (t.modules) {
-                                t.modules.forEach(m => {
-                                    if (m.timer && m.timer > 0) {
-                                        builderItems.push({ name: nameMapping[m.data] || `Thành phần tháp (ID: ${m.data})`, level: m.lvl, timer: m.timer });
-                                    }
-                                });
-                            }
-                        });
-                    }
                 });
             }
 
-            // 4. Quét Buildings2 (Công trình phụ/Làng biển) đang nâng cấp có timer
             if (cocData.buildings2) {
                 cocData.buildings2.forEach(b2 => {
                     if (b2.timer && b2.timer > 0) {
@@ -245,7 +236,7 @@
                 });
             }
 
-            // Sắp xếp thời gian ngắn nhất lên trên đầu cho Thợ Xây
+            // Sắp xếp thời gian ngắn nhất lên trên
             builderItems.sort((a, b) => a.timer - b.timer);
 
             const buildersContainer = document.getElementById('builders-list');
@@ -268,7 +259,7 @@
                 });
             }
 
-            // Phòng Thí Nghiệm (Bao gồm cả Thợ săn tướng ID 28000007 nằm trong heroes và các units trong Lab)
+            // 2. Phòng Thí Nghiệm (Bao gồm Thợ săn tường ID 28000007 và các đơn vị units trong Lab)
             let labItems = [];
             
             if (cocData.heroes) {
@@ -307,7 +298,7 @@
                 });
             }
 
-            // Chuồng Linh Thú (Pets)
+            // 3. Chuồng Linh Thú (Pets)
             let petItems = [];
             if (cocData.pets) {
                 cocData.pets.forEach(p => {
@@ -353,17 +344,6 @@
                             cocData[key].forEach(item => {
                                 if (item.timer && item.timer > 0) {
                                     item.timer = Math.max(0, item.timer - elapsedSeconds);
-                                }
-                                if (item.types) {
-                                    item.types.forEach(t => {
-                                        if (t.modules) {
-                                            t.modules.forEach(m => {
-                                                if (m.timer && m.timer > 0) {
-                                                    m.timer = Math.max(0, m.timer - elapsedSeconds);
-                                                }
-                                            });
-                                        }
-                                    });
                                 }
                             });
                         }
