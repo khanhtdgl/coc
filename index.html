@@ -40,7 +40,6 @@
         .item-list { list-style: none; }
         .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
         
-        /* Hiệu ứng khi công trình được chỉ định Thợ học việc */
         .item-list li.has-apprentice { border-left-color: #e67e22; background: rgba(230, 126, 34, 0.08); }
 
         #upcoming-list li { border-left-color: #e67e22; }
@@ -50,7 +49,6 @@
 
         .item-left-side { display: flex; align-items: center; gap: 10px; flex: 1; }
         
-        /* Nút chọn thợ học việc hình thợ xây */
         .btn-assign-app {
             background: #3a3a3c; color: #8e8e93; border: none; border-radius: 6px;
             padding: 6px 10px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
@@ -94,7 +92,7 @@
                 
                 <div class="helpers-box">
                     <div class="helper-item">
-                        <label>👷 Cấp Thợ Xây Học Việc (-h/ngày)</label>
+                        <label>👷 Cấp Thợ Xây Học Việc</label>
                         <select id="builder-apprentice-lvl">
                             <option value="0">Không dùng (0h)</option>
                             <option value="1">Cấp 1 (-1h)</option>
@@ -108,7 +106,7 @@
                         </select>
                     </div>
                     <div class="helper-item">
-                        <label>🧪 Phụ Tá Lab (-h/ngày)</label>
+                        <label>🧪 Phụ Tá Lab</label>
                         <select id="lab-apprentice-lvl">
                             <option value="0">Không dùng (0h)</option>
                             <option value="1">Cấp 1 (-1h)</option>
@@ -212,7 +210,7 @@
 
         let activeTimers = []; 
         let countdownInterval = null;
-        let assignedBuilderApprenticeId = null; // Lưu ID công trình đang được thợ học việc phụ trách
+        let assignedBuilderApprenticeId = null;
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
@@ -237,7 +235,7 @@
             return Math.floor(timerSeconds * ratio);
         }
 
-        let globalGameData = null; // Lưu dữ liệu JSON gốc để render lại khi đổi chỉ định
+        let globalGameData = null;
 
         function processData(data) {
             globalGameData = data;
@@ -270,7 +268,6 @@
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
             if (data.pets) extractTimers(data.pets, petsData);
 
-            // Nếu chưa chỉ định hoặc mục chỉ định không còn tồn tại, mặc định gán cho thợ đầu tiên
             let allBuilderItems = [...buildersData, ...petsData];
             if (allBuilderItems.length > 0) {
                 if (!assignedBuilderApprenticeId || !allBuilderItems.some(i => i.data === assignedBuilderApprenticeId)) {
@@ -278,7 +275,7 @@
                 }
             }
 
-            // Tính toán thời gian thực tế
+            // Chỉ duy nhất mục được chỉ định mới bị trừ thời gian
             buildersData.forEach(item => {
                 let t = item.timer;
                 if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t, builderAppLvl);
@@ -289,6 +286,8 @@
                 if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t, builderAppLvl);
                 item.adjustedTimer = t;
             });
+            
+            // Lab áp dụng cho phụ tá lab
             labData.forEach(item => {
                 item.adjustedTimer = calculateAdjustedTime(item.timer, labAppLvl);
             });
@@ -342,9 +341,9 @@
             }
 
             renderList(upcomingData, ui.upcoming, true, false);
-            renderList(buildersData, ui.builders, false, true); // Cho phép gán thợ ở bảng Thợ Xây
+            renderList(buildersData, ui.builders, false, true);
             renderList(labData, ui.lab, false, false);
-            renderList(petsData, ui.pets, false, true); // Cho phép gán thợ ở bảng Linh Thú
+            renderList(petsData, ui.pets, false, true);
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
@@ -359,11 +358,10 @@
             startRealtimeCountdown();
         }
 
-        // Hàm khi người dùng bấm nút gán thợ học việc vào công trình cụ thể
         window.assignApprentice = function(id) {
             assignedBuilderApprenticeId = id;
             localStorage.setItem('coc_assigned_apprentice', id);
-            renderAllSections(); // Vẽ lại giao diện ngay lập tức
+            renderAllSections();
         }
 
         function startRealtimeCountdown() {
@@ -421,7 +419,7 @@
             } catch (err) { window.location.reload(true); }
         });
 
-5        function handleJSON(jsonText) {
+        function handleJSON(jsonText) {
             const text = jsonText.trim();
             if (!text) return;
             try {
