@@ -351,6 +351,7 @@
                 item.adjustedTimer = t;
             });
             
+            // Linh thú không áp dụng thợ học việc, giữ nguyên timer gốc
             petsData.forEach(item => {
                 item.originalTimer = item.timer;
                 item.adjustedTimer = item.timer;
@@ -363,7 +364,7 @@
             let allData = [...buildersData, ...labData, ...petsData];
             let upcomingData = allData.filter(item => item.adjustedTimer <= 86400).sort((a, b) => a.adjustedTimer - b.adjustedTimer);
 
-            function renderList(dataArray, targetUI, isMuted = false, isLabList = false) {
+            function renderList(dataArray, targetUI, isMuted = false, isLabList = false, isPetList = false) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
                     const itemName = getName(item.data);
@@ -372,7 +373,7 @@
                     
                     const isSelected = isLabList ? (item.data == selectedLabId) : (item.data == selectedBuilderId);
                     const isActiveWork = isLabList ? isLabWorking : isBuilderWorking;
-                    const isAssigned = isSelected && isActiveWork;
+                    const isAssigned = !isPetList && isSelected && isActiveWork;
 
                     const savedTimeStr = formatSavedTime(item.originalTimer, item.adjustedTimer);
 
@@ -381,17 +382,21 @@
                         else li.classList.add('has-helper');
                     }
 
-                    let btnText = isLabList ? "🧪 Gán Phụ Tá" : "👷 Gán Thợ Học Việc";
-                    if (isAssigned) {
-                        btnText = isLabList ? "🧪 Đang Tăng Tốc (x8)" : "👷 Đang Làm Việc (x8)";
-                    }
+                    let helperBtnHTML = "";
+                    // Linh thú không có nút gán thợ học việc
+                    if (!isPetList) {
+                        let btnText = isLabList ? "🧪 Gán Phụ Tá" : "👷 Gán Thợ Học Việc";
+                        if (isAssigned) {
+                            btnText = isLabList ? "🧪 Đang Tăng Tốc (x8)" : "👷 Đang Làm Việc (x8)";
+                        }
 
-                    const helperBtnHTML = `
-                        <button class="btn-item-action ${isAssigned ? 'active' : ''}" 
-                            onclick="${isLabList ? 'selectLabItem' : 'selectBuilderItem'}(${item.data})">
-                            ${btnText}
-                        </button>
-                    `;
+                        helperBtnHTML = `
+                            <button class="btn-item-action ${isAssigned ? 'active' : ''}" 
+                                onclick="${isLabList ? 'selectLabItem' : 'selectBuilderItem'}(${item.data})">
+                                ${btnText}
+                            </button>
+                        `;
+                    }
 
                     li.innerHTML = `
                         <div class="item-info">
@@ -417,10 +422,10 @@
                 });
             }
 
-            renderList(upcomingData, ui.upcoming, true, false);
-            renderList(buildersData, ui.builders, false, false);
-            renderList(labData, ui.lab, false, true);
-            renderList(petsData, ui.pets, false, false);
+            renderList(upcomingData, ui.upcoming, true, false, false);
+            renderList(buildersData, ui.builders, false, false, false);
+            renderList(labData, ui.lab, false, true, false);
+            renderList(petsData, ui.pets, false, false, true); // Đánh dấu là danh sách linh thú để không hiện nút gán
 
             ui.counts.upcoming.textContent = upcomingData.length;
             ui.counts.builders.textContent = buildersData.length;
