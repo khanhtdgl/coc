@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiến Trình Nâng Cấp - Sata Say</title>
+    <title>Tiến Trình Nâng Cấp - Làng Chính</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f7f6; color: #333; padding: 20px; }
@@ -72,7 +72,6 @@
     </div>
 
     <script>
-        // TỪ ĐIỂN TIẾNG VIỆT (Khớp 100% với ảnh của Sata Say)
         const idDictionary = {
             102000039: "Kẻ hủy diệt",
             107000001: "Máy ném bánh",
@@ -80,10 +79,8 @@
             28000007: "Công tước Rồng",
             28000000: "Man di Vương",
             107000008: "Tiểu phu",
-            
             4000082: "Lính / Phép thuật", 
             73000017: "Linh thú đang huấn luyện", 
-            
             1000000: "Hội trường Tòa thị chính"
         };
 
@@ -128,7 +125,6 @@
             ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
         }
 
-        // Hàm trích xuất dữ liệu thông minh: Bỏ qua Làng Đêm, chỉ lùng sục đúng khu vực được chỉ định
         function extractTimers(obj, resultsArray) {
             if (Array.isArray(obj)) {
                 obj.forEach(item => extractTimers(item, resultsArray));
@@ -150,24 +146,20 @@
             ui.tag.textContent = data.tag || "Không có Tag";
             ui.tag.style.color = "#27ae60";
 
-            // 1. Quét Nhóm Thợ Xây Làng Chính (Công trình, Bẫy, Tướng, Guardians)
             let buildersData = [];
             if (data.buildings) extractTimers(data.buildings, buildersData);
             if (data.traps) extractTimers(data.traps, buildersData);
             if (data.heroes) extractTimers(data.heroes, buildersData);
             if (data.guardians) extractTimers(data.guardians, buildersData);
 
-            // 2. Quét Nhóm Phòng Thí Nghiệm (Lính, Phép, Máy công thành)
             let labData = [];
             if (data.units) extractTimers(data.units, labData);
             if (data.spells) extractTimers(data.spells, labData);
             if (data.siege_machines) extractTimers(data.siege_machines, labData);
 
-            // 3. Quét Nhóm Chuồng Linh Thú
             let petsData = [];
             if (data.pets) extractTimers(data.pets, petsData);
 
-            // HÀM RENDER RA MÀN HÌNH
             function renderList(dataArray, targetUI) {
                 dataArray.forEach(item => {
                     const li = document.createElement('li');
@@ -181,12 +173,10 @@
             renderList(labData, ui.lab);
             renderList(petsData, ui.pets);
 
-            // Cập nhật số đếm
             ui.counts.builders.textContent = ui.builders.children.length;
             ui.counts.lab.textContent = ui.lab.children.length;
             ui.counts.pets.textContent = ui.pets.children.length;
 
-            // Nếu trống thì hiện thông báo
             if (ui.builders.children.length === 0) ui.builders.innerHTML = "<li class='empty-msg'>😴 Thợ xây đang rảnh rỗi...</li>";
             if (ui.lab.children.length === 0) ui.lab.innerHTML = "<li class='empty-msg'>🧪 Phòng thí nghiệm đang tắt đèn...</li>";
             if (ui.pets.children.length === 0) ui.pets.innerHTML = "<li class='empty-msg'>🐾 Không có linh thú nào đang huấn luyện...</li>";
@@ -198,11 +188,24 @@
             try {
                 const data = JSON.parse(text); 
                 processData(data);
+                
+                // LƯU DỮ LIỆU VÀO BỘ NHỚ TRÌNH DUYỆT
+                localStorage.setItem('saved_coc_json', text);
+                
             } catch (error) {
                 ui.error.textContent = "Mã JSON bị sai định dạng. Vui lòng copy đầy đủ từ đầu đến cuối!";
                 ui.error.style.display = 'block';
             }
         }
+
+        // TỰ ĐỘNG TẢI LẠI DỮ LIỆU KHI MỞ TRANG HOẶC F5
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedData = localStorage.getItem('saved_coc_json');
+            if (savedData) {
+                ui.input.value = savedData;
+                handleJSON(savedData);
+            }
+        });
 
         document.getElementById('btn-process').addEventListener('click', () => { handleJSON(ui.input.value); });
         
@@ -224,6 +227,9 @@
         document.getElementById('btn-clear').addEventListener('click', () => {
             ui.input.value = ''; clearUI();
             ui.tag.textContent = 'Chưa có dữ liệu'; ui.tag.style.color = '#f1c40f';
+            
+            // XÓA DỮ LIỆU TRONG BỘ NHỚ KHI BẤM NÚT XÓA
+            localStorage.removeItem('saved_coc_json');
         });
     </script>
 </body>
