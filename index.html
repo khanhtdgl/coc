@@ -33,21 +33,34 @@
         .btn-secondary { background-color: #e74c3c; color: white; flex: 1; }
 
         .item-list { list-style: none; }
-        .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 8px;}
+        .item-list li { background: #1c1c1e; margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #3498db; flex-wrap: wrap; gap: 10px;}
         
         #upcoming-list li { border-left-color: #e67e22; }
         #builders-list li { border-left-color: #f39c12; }
         #lab-list li { border-left-color: #9b59b6; }
         #pets-list li { border-left-color: #2ecc71; }
 
-        /* Style gọn gàng cho phần hiển thị thời gian */
-        .timer-box { text-align: right; }
-        .timer { color: #fff; font-size: 0.85em; background: #e74c3c; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
-        .timer.done { background: #27ae60; }
-        .target-date { display: block; font-size: 0.75em; color: #8e8e93; margin-top: 3px; }
+        .item-info { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+        .item-name { font-weight: 600; font-size: 1rem; color: #fff; }
 
-        .item-name { font-weight: 500; font-size: 0.95em; }
-        .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important;}
+        /* Style mới cho phần thời gian: To hơn, có màu nền riêng biệt */
+        .timer-box { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .timer { color: #fff; font-size: 0.9em; background: #e74c3c; padding: 6px 12px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
+        .timer.done { background: #27ae60; }
+        
+        /* Khung ngày giờ hoàn thành được làm to và có màu nền riêng */
+        .target-date { 
+            font-size: 0.85em; 
+            color: #f1c40f; 
+            background: rgba(241, 196, 15, 0.1); 
+            border: 1px solid rgba(241, 196, 15, 0.3); 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .empty-msg { color: #8e8e93; font-style: italic; background: transparent !important; border-left: none !important; justify-content: center !important; width: 100%; text-align: center; }
         
         .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 13px; font-weight: bold; margin-left: auto; }
 
@@ -143,7 +156,6 @@
             return `⏳ ${timeParts.join(' ')}`;
         }
 
-        // Hàm chuyển đổi thời gian kết thúc sang định dạng ngày tháng giờ gọn gàng
         function formatTargetDate(endTimeInSeconds) {
             const date = new Date(endTimeInSeconds * 1000);
             const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
@@ -213,7 +225,9 @@
                     const dateStr = formatTargetDate(endTime);
 
                     li.innerHTML = `
-                        <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span> 
+                        <div class="item-info">
+                            <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
+                        </div>
                         <div class="timer-box">
                             <span class="timer">Đang tính...</span>
                             <span class="target-date">📅 ${dateStr}</span>
