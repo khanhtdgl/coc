@@ -143,7 +143,7 @@
                 </div>
 
                 <div class="apprentice-row">
-                    <label>⏱️ Chỉnh sửa thời gian khả dụng thợ xây:</label>
+                    <label>⏱️ Chỉnh sửa thời gian khả dụng chung:</label>
                     <div class="time-inputs">
                         <input type="number" id="input-hours" placeholder="Giờ" min="0"> <span>h</span>
                         <input type="number" id="input-mins" placeholder="Phút" min="0" max="59"> <span>m</span>
@@ -181,7 +181,7 @@
                 </div>
 
                 <div class="apprentice-row">
-                    <label>⏱️ Chỉnh sửa thời gian khả dụng phụ tá Lab:</label>
+                    <label>⏱️ Chỉnh sửa thời gian khả dụng chung:</label>
                     <div class="time-inputs">
                         <input type="number" id="lab-input-hours" placeholder="Giờ" min="0"> <span>h</span>
                         <input type="number" id="lab-input-mins" placeholder="Phút" min="0" max="59"> <span>m</span>
@@ -323,6 +323,7 @@
                 const helperLvl8 = data.helpers.find(h => h.lvl === 8);
                 if (helperLvl8 && helperLvl8.helper_cooldown !== undefined) {
                     helperCooldownSeconds = helperLvl8.helper_cooldown;
+                    labCooldownSeconds = helperLvl8.helper_cooldown; // Thời gian khả dụng giống nhau
                 }
             }
 
@@ -335,21 +336,22 @@
             const savedLabCd = localStorage.getItem('coc_lab_cooldown');
             if (savedLabCd !== null) labCooldownSeconds = parseInt(savedLabCd);
 
-            updateTimeInputs(helperCooldownSeconds);
-            updateLabTimeInputs(labCooldownSeconds);
+            updateAllTimeInputs();
             renderAllSections();
         }
 
-        function updateTimeInputs(totalSeconds) {
-            ui.inputHours.value = Math.floor(totalSeconds / 3600);
-            ui.inputMins.value = Math.floor((totalSeconds % 3600) / 60);
-            ui.inputSecs.value = totalSeconds % 60;
-        }
+        function updateAllTimeInputs() {
+            const h = Math.floor(helperCooldownSeconds / 3600);
+            const m = Math.floor((helperCooldownSeconds % 3600) / 60);
+            const s = helperCooldownSeconds % 60;
 
-        function updateLabTimeInputs(totalSeconds) {
-            ui.labInputHours.value = Math.floor(totalSeconds / 3600);
-            ui.labInputMins.value = Math.floor((totalSeconds % 3600) / 60);
-            ui.labInputSecs.value = totalSeconds % 60;
+            ui.inputHours.value = h;
+            ui.inputMins.value = m;
+            ui.inputSecs.value = s;
+
+            ui.labInputHours.value = h;
+            ui.labInputMins.value = m;
+            ui.labInputSecs.value = s;
         }
 
         function renderAllSections() {
@@ -394,7 +396,6 @@
                 }
             }
 
-            // Populate Lab Select
             ui.labAssignSelect.innerHTML = '<option value="">-- Chọn nghiên cứu để x8 --</option>';
             labData.forEach(item => {
                 const name = getName(item.data);
@@ -506,7 +507,6 @@
         }
 
         function updateStatusDisplays() {
-            // Thợ xây
             if (workTimeRemaining > 0) {
                 ui.status.textContent = "Đang làm việc (x8)";
                 ui.status.style.color = "#27ae60";
@@ -524,7 +524,6 @@
                 ui.btnStartWork.textContent = "Bắt đầu làm việc (1h)";
             }
 
-            // Phụ tá Lab
             if (labWorkTimeRemaining > 0) {
                 ui.labStatus.textContent = "Đang nghiên cứu (x8)";
                 ui.labStatus.style.color = "#27ae60";
@@ -547,9 +546,11 @@
             if (helperCooldownSeconds <= 0 && workTimeRemaining <= 0) {
                 workTimeRemaining = 3600; 
                 helperCooldownSeconds = 23 * 3600; 
+                labCooldownSeconds = 23 * 3600; // Đồng bộ thời gian khả dụng chung
                 localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
                 localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                updateTimeInputs(helperCooldownSeconds);
+                localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
+                updateAllTimeInputs();
                 renderAllSections();
             }
         });
@@ -558,31 +559,35 @@
             if (labCooldownSeconds <= 0 && labWorkTimeRemaining <= 0) {
                 labWorkTimeRemaining = 3600; 
                 labCooldownSeconds = 23 * 3600; 
+                helperCooldownSeconds = 23 * 3600; // Đồng bộ thời gian khả dụng chung
                 localStorage.setItem('coc_lab_work_time_remaining', labWorkTimeRemaining);
                 localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-                updateLabTimeInputs(labCooldownSeconds);
+                localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
+                updateAllTimeInputs();
                 renderAllSections();
             }
         });
 
-        document.getElementById('btn-set-cooldown').addEventListener('click', () => {
-            const h = parseInt(ui.inputHours.value) || 0;
-            const m = parseInt(ui.inputMins.value) || 0;
-            const s = parseInt(ui.inputSecs.value) || 0;
-            helperCooldownSeconds = (h * 3600) + (m * 60) + s;
-            localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
+        function handleCooldownUpdate(hEl, mEl, sEl) {
+            const h = parseInt(hEl.value) || 0;
+            const m = parseInt(mEl.value) || 0;
+            const s = parseInt(sEl.value) || 0;
+            const total = (h * 3600) + (m * 60) + s;
+            helperCooldownSeconds = total;
+            labCooldownSeconds = total; // Đồng bộ cả hai
+            localStorage.setItem('coc_helper_cooldown', total);
+            localStorage.setItem('coc_lab_cooldown', total);
+            updateAllTimeInputs();
             renderAllSections();
-            alert("Đã cập nhật thời gian khả dụng thợ xây!");
+            alert("Đã cập nhật thời gian khả dụng chung thành công!");
+        }
+
+        document.getElementById('btn-set-cooldown').addEventListener('click', () => {
+            handleCooldownUpdate(ui.inputHours, ui.inputMins, ui.inputSecs);
         });
 
         document.getElementById('btn-lab-set-cooldown').addEventListener('click', () => {
-            const h = parseInt(ui.labInputHours.value) || 0;
-            const m = parseInt(ui.labInputMins.value) || 0;
-            const s = parseInt(ui.labInputSecs.value) || 0;
-            labCooldownSeconds = (h * 3600) + (m * 60) + s;
-            localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-            renderAllSections();
-            alert("Đã cập nhật thời gian khả dụng phụ tá Lab!");
+            handleCooldownUpdate(ui.labInputHours, ui.labInputMins, ui.labInputSecs);
         });
 
         ui.assignSelect.addEventListener('change', (e) => {
@@ -603,7 +608,6 @@
             countdownInterval = setInterval(() => {
                 const now = Math.floor(Date.now() / 1000); 
 
-                // Thợ xây
                 if (workTimeRemaining > 0) {
                     workTimeRemaining--;
                     localStorage.setItem('coc_work_time_remaining', workTimeRemaining);
@@ -611,24 +615,22 @@
                 }
                 if (helperCooldownSeconds > 0) {
                     helperCooldownSeconds--;
+                    labCooldownSeconds = helperCooldownSeconds; // Đồng bộ liên tục
                     localStorage.setItem('coc_helper_cooldown', helperCooldownSeconds);
-                    ui.cooldown.textContent = formatTimeRealtime(helperCooldownSeconds);
+                    localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
+                    
+                    const timeStr = formatTimeRealtime(helperCooldownSeconds);
+                    ui.cooldown.textContent = timeStr;
+                    ui.labCooldown.textContent = timeStr;
                 } else {
                     ui.cooldown.textContent = "Khả dụng ngay! 🎉";
+                    ui.labCooldown.textContent = "Khả dụng ngay! 🎉";
                 }
 
-                // Phụ tá Lab
                 if (labWorkTimeRemaining > 0) {
                     labWorkTimeRemaining--;
                     localStorage.setItem('coc_lab_work_time_remaining', labWorkTimeRemaining);
                     if (labWorkTimeRemaining <= 0) renderAllSections();
-                }
-                if (labCooldownSeconds > 0) {
-                    labCooldownSeconds--;
-                    localStorage.setItem('coc_lab_cooldown', labCooldownSeconds);
-                    ui.labCooldown.textContent = formatTimeRealtime(labCooldownSeconds);
-                } else {
-                    ui.labCooldown.textContent = "Khả dụng ngay! 🎉";
                 }
 
                 updateStatusDisplays();
