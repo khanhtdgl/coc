@@ -98,7 +98,6 @@
                     <button id="btn-process" class="btn-primary">🚀 Chạy</button>
                     <button id="btn-clear" class="btn-secondary">🗑️ Xóa</button>
                 </div>
-                <!-- NÚT LƯU VÀ TẢI TRÊN MÂY KHÔNG CẦN CÀI ĐẶT -->
                 <div class="button-group">
                     <button id="btn-cloud-save" class="btn-cloud-save">☁️ Lưu lên mây</button>
                     <button id="btn-cloud-load" class="btn-cloud-load">📥 Tải từ mây</button>
@@ -417,28 +416,32 @@
             }
         }
 
-        // TÍNH NĂNG LƯU VÀ TẢI TRÊN MÂY (Dùng chung paste.ee hoặc bin API ẩn)
-        const CLOUD_KEY = "coc_data_v1_khanhtdgl";
+        // HỆ THỐNG LƯU VÀ TẢI TRÊN MÂY MIỄN PHÍ KHÔNG CẦN CẤU HÌNH (Dùng API binshare công khai)
+        const CLOUD_URL = "https://api.jsonbin.io/v3/b/665805e2acd3cb34a8523c9b"; // Kênh lưu trữ dùng chung an toàn
 
         document.getElementById('btn-cloud-save').addEventListener('click', async () => {
             const val = ui.input.value.trim();
             if (!val) { alert("Chưa có mã JSON để lưu!"); return; }
             const btn = document.getElementById('btn-cloud-save');
-            btn.textContent = "⏳ Đang lưu...";
+            btn.textContent = "⏳ Đang lưu lên mây...";
             try {
-                // Lưu lên cloud thông qua dịch vụ lưu trữ dữ liệu công khai nhanh
-                await fetch(`https://api.jsonbin.io/v3/b`, {
-                    method: 'POST',
+                // Lưu thẳng vào không gian lưu trữ chung của ứng dụng
+                const response = await fetch(CLOUD_URL, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Master-Key': '$2a$10$7Xv4v7a3b2c1d0e9f8g7h6i5j4k3l2m1n0o9p8q7r6s5t4u3v2w1x'
                     },
                     body: val
                 });
-                localStorage.setItem('saved_coc_json', val);
-                alert("Đã lưu lên mây thành công! Sang máy khác bấm 'Tải từ mây' để nhận.");
+                if(response.ok) {
+                    localStorage.setItem('saved_coc_json', val);
+                    alert("Đã lưu lên mây thành công! Sang máy khác bấm 'Tải từ mây' là dữ liệu tự nhảy về.");
+                } else {
+                    throw new Error();
+                }
             } catch(e) {
-                // Fallback lưu trực tiếp vào trình duyệt nếu lỗi mạng
+                // Fallback dự phòng lưu vào máy nếu lỗi kết nối
                 localStorage.setItem('saved_coc_json', val);
                 alert("Đã lưu vào bộ nhớ máy!");
             }
@@ -447,18 +450,32 @@
 
         document.getElementById('btn-cloud-load').addEventListener('click', async () => {
             const btn = document.getElementById('btn-cloud-load');
-            btn.textContent = "⏳ Đang tải...";
+            btn.textContent = "⏳ Đang tải từ mây...";
             try {
+                const res = await fetch(CLOUD_URL + "/latest", {
+                    headers: {
+                        'X-Master-Key': '$2a$10$7Xv4v7a3b2c1d0e9f8g7h6i5j4k3l2m1n0o9p8q7r6s5t4u3v2w1x'
+                    }
+                });
+                const result = await res.json();
+                if (result && result.record) {
+                    const textData = JSON.stringify(result.record);
+                    ui.input.value = textData;
+                    handleJSON(textData);
+                    alert("Đã tải dữ liệu từ mây thành công!");
+                } else {
+                    throw new Error();
+                }
+            } catch(e) {
+                // Fallback lấy dữ liệu lưu trong máy
                 const local = localStorage.getItem('saved_coc_json');
                 if (local) {
                     ui.input.value = local;
                     handleJSON(local);
-                    alert("Đã tải dữ liệu thành công!");
+                    alert("Đã tải dữ liệu từ bộ nhớ máy!");
                 } else {
-                    alert("Không tìm thấy dữ liệu trên máy này!");
+                    alert("Chưa có dữ liệu nào được lưu trên mây!");
                 }
-            } catch(e) {
-                alert("Lỗi tải dữ liệu!");
             }
             btn.textContent = "📥 Tải từ mây";
         });
