@@ -10,32 +10,33 @@
     <div class="container">
         <header>
             <h1>Clash of Clans Tracker</h1>
-            <p>Player Tag: <span id="player-tag">Chưa có dữ liệu</span></p>
+            <p>Player Tag: <span id="player-tag" style="font-weight: bold; color: #f1c40f;">Chưa có dữ liệu</span></p>
         </header>
 
         <main>
-            <!-- Khu vực nhập mã JSON -->
             <section class="card input-section">
                 <h2>Nhập dữ liệu JSON</h2>
-                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây..." rows="6"></textarea>
+                <textarea id="json-input" placeholder="Dán toàn bộ mã JSON của bạn vào đây..." rows="5"></textarea>
                 <div class="button-group">
-                    <button id="btn-process" class="btn-primary">Hiển thị dữ liệu</button>
-                    <button id="btn-clear" class="btn-secondary">Xóa ô nhập</button>
+                    <button id="btn-paste" class="btn-info">📋 Dán mã</button>
+                    <button id="btn-process" class="btn-primary">🚀 Hiển thị dữ liệu</button>
+                    <button id="btn-clear" class="btn-secondary">🗑️ Xóa ô</button>
                 </div>
+                <p id="error-msg" style="color: red; margin-top: 10px; font-size: 14px; display: none;"></p>
             </section>
 
             <section class="card">
-                <h2>Đang Nâng Cấp (Upgrading)</h2>
+                <h2>🏗️ Đang Nâng Cấp (Upgrading)</h2>
                 <ul id="upgrading-list" class="item-list"></ul>
             </section>
 
             <section class="card">
-                <h2>Heroes (Tướng)</h2>
+                <h2>👑 Heroes (Tướng)</h2>
                 <ul id="heroes-list" class="item-list"></ul>
             </section>
             
             <section class="card">
-                <h2>Pets (Thú cưng)</h2>
+                <h2>🐾 Pets (Thú cưng)</h2>
                 <ul id="pets-list" class="item-list"></ul>
             </section>
         </main>
