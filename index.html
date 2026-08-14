@@ -22,6 +22,11 @@
         .card-hot { border: 1px solid #e67e22; background: rgba(230, 126, 34, 0.05); }
         .card-hot h2 { color: #e67e22; border-bottom-color: rgba(230, 126, 34, 0.3); }
         
+        /* Giao diện mô phỏng bảng Thợ xây học việc trong game */
+        .apprentice-panel { background: #3a3a3c; border: 1px solid #e67e22; border-radius: 10px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .apprentice-title { font-weight: bold; color: #f39c12; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+        .apprentice-desc { font-size: 0.8rem; color: #aaa; }
+
         textarea { width: 100%; padding: 12px; border: 1px solid #3a3a3c; background: #1c1c1e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-family: monospace; font-size: 14px; resize: vertical; outline: none; }
         textarea:focus { border-color: #3498db; }
         
@@ -44,15 +49,20 @@
 
         .item-left-side { display: flex; align-items: center; gap: 10px; flex: 1; }
         
+        /* Nút chọn thợ học việc giống trong game */
         .btn-assign-app {
-            background: #3a3a3c; color: #8e8e93; border: none; border-radius: 6px;
-            padding: 6px 10px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+            background: #2c2c2e; color: #8e8e93; border: 1px solid #4a4a4c; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
             transition: 0.2s; white-space: nowrap;
         }
-        .btn-assign-app.active { background: #e67e22; color: #fff; font-weight: bold; }
+        .btn-assign-app.active { background: #e67e22; color: #fff; border-color: #f39c12; font-weight: bold; }
 
         .item-info { display: flex; flex-direction: column; gap: 4px; }
         .item-name { font-weight: 600; font-size: 0.95rem; color: #fff; }
+
+        /* Hiển thị thời gian tiết kiệm giống y hệt ảnh game */
+        .saved-time { font-size: 0.75rem; color: #e67e22; font-weight: bold; display: none; }
+        .has-apprentice .saved-time { display: inline-block; }
 
         .timer-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
         .timer { color: #fff; font-size: 0.85em; background: #e74c3c; padding: 5px 10px; border-radius: 6px; font-weight: bold; text-align: center; white-space: nowrap; }
@@ -91,6 +101,17 @@
                 </div>
                 <p id="error-msg" style="color: #ff453a; margin-top: 10px; font-size: 14px; display: none; font-weight: bold;"></p>
             </section>
+
+            <!-- BẢNG MÔ PHỎNG THỢ XÂY HỌC VIỆC TRONG GAME -->
+            <div class="apprentice-panel">
+                <div>
+                    <div class="apprentice-title">👷 Thợ xây học việc cấp 8</div>
+                    <div class="apprentice-desc">Giảm 8 giờ làm việc mỗi ngày cho 1 thợ được chọn</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; color: #f39c12; font-weight: bold;">Tốc độ: x8</div>
+                </div>
+            </div>
 
             <section class="card card-hot">
                 <h2>🔥 Xong trong 24h tới <span id="upcoming-count" class="badge" style="background:#e67e22;">0</span></h2>
@@ -156,6 +177,16 @@
             return `⏳ ${timeParts.join(' ')}`;
         }
 
+        // Tính thời gian tiết kiệm được để hiển thị chữ giống trong game
+        function formatSavedTime(originalSeconds, adjustedSeconds) {
+            const diff = originalSeconds - adjustedSeconds;
+            if (diff <= 0) return "";
+            const days = Math.floor(diff / (3600 * 24));
+            const hours = Math.floor((diff % (3600 * 24)) / 3600);
+            if (days > 0) return `⏱️ Thời gian tiết kiệm: ${days}ngày ${hours}giờ`;
+            return `⏱️ Thời gian tiết kiệm: ${hours}giờ`;
+        }
+
         function formatTargetDate(endTimeInSeconds) {
             const date = new Date(endTimeInSeconds * 1000);
             const options = { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
@@ -175,7 +206,7 @@
 
         function clearUI() {
             ui.upcoming.innerHTML = ''; ui.builders.innerHTML = ''; ui.lab.innerHTML = ''; ui.pets.innerHTML = '';
-            ui.tag.textContent = 'End'; ui.error.style.display = 'none';
+            ui.tag.textContent = 'Chưa có dữ liệu'; ui.error.style.display = 'none';
             ui.counts.upcoming.textContent = "0"; ui.counts.builders.textContent = "0"; ui.counts.lab.textContent = "0"; ui.counts.pets.textContent = "0";
             activeTimers = [];
             if (countdownInterval) clearInterval(countdownInterval);
@@ -190,9 +221,8 @@
             }
         }
 
-        // Mặc định cấp 8: Giảm 8h/ngày (hệ số 16/24 = 2/3 thời gian)
         function calculateAdjustedTime(timerSeconds) {
-            const ratio = 16 / 24;
+            const ratio = 16 / 24; // Cấp 8 giảm 8h/ngày
             return Math.floor(timerSeconds * ratio);
         }
 
@@ -234,20 +264,23 @@
                 }
             }
 
-            // Chỉ duy nhất mục được chỉ định mới bị trừ 8h/ngày (thợ học việc)
+            // Tính thời gian cho thợ xây (chỉ món được gán mới giảm)
             buildersData.forEach(item => {
+                item.originalTimer = item.timer;
                 let t = item.timer;
                 if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t);
                 item.adjustedTimer = t;
             });
             petsData.forEach(item => {
+                item.originalTimer = item.timer;
                 let t = item.timer;
                 if (item.data === assignedBuilderApprenticeId) t = calculateAdjustedTime(t);
                 item.adjustedTimer = t;
             });
             
-            // Lab tự động áp dụng phụ tá lab tối đa cấp 8
+            // Lab tự động áp dụng phụ tá lab cấp 8
             labData.forEach(item => {
+                item.originalTimer = item.timer;
                 item.adjustedTimer = calculateAdjustedTime(item.timer);
             });
 
@@ -265,6 +298,7 @@
                     const endTime = jsonTimestamp + item.adjustedTimer;
                     const dateStr = formatTargetDate(endTime);
                     const isAssigned = allowAssign && (item.data === assignedBuilderApprenticeId);
+                    const savedTimeStr = formatSavedTime(item.originalTimer, item.adjustedTimer);
 
                     if (isAssigned) li.classList.add('has-apprentice');
 
@@ -278,6 +312,7 @@
                         <div class="item-left-side">
                             <div class="item-info">
                                 <span class="item-name">${itemName} ➡️ Cấp ${(item.lvl || 0) + 1}</span>
+                                <span class="saved-time">${savedTimeStr}</span>
                                 ${assignBtnHTML}
                             </div>
                         </div>
