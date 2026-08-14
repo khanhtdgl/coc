@@ -28,7 +28,7 @@
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="card p-3 h-100 shadow">
-                    <h4 class="text-info border-bottom pb-2">👷 Thợ Xây Đang Làm (0/6)</h4>
+                    <h4 class="text-info border-bottom pb-2" id="builders-title">👷 Thợ Xây Đang Làm (0/6)</h4>
                     <ul id="builders-list" class="list-unstyled mt-3">
                         <li class="text-muted">Chưa có dữ liệu.</li>
                     </ul>
@@ -58,34 +58,32 @@
     <script>
         let cocData = null;
 
-        // Từ điển ánh xạ ID sang tên tiếng Việt chuẩn theo hình ảnh game của bạn
         const nameMapping = {
-            // Tướng (Heroes)
+            // Tướng & Hộ vệ
             28000000: "Vua Barbarian (BK)",
             28000001: "Nữ Hoàng Archer (AQ)",
             28000002: "Đại Warden (GW)",
-            28000004: "Đội Trợ Chiến / Champion",
+            28000004: "Nữ Hoàng Sĩ Quan / Champion",
             28000006: "Minion Prince / Man di Vương",
             28000007: "Thợ săn Tường",
-            28000003: "Vua Thợ Rèn (BH)",
-            28000005: "Cỗ xe chiến đấu (BH)",
-            
-            // Công trình chính & Hộ vệ / Máy bắn đá / Tháp...
             107000001: "Kẻ hủy diệt (Monolith)",
-            107000008: "Máy ném bánh (Spell Tower / Đồ chơi)",
+            107000008: "Máy ném bánh (Spell Tower)",
+            
+            // Công trình chính & Làng biển (Builder Base)
             1000013: "Tháp Pháo / Công thành",
             1000011: "Xưởng chế tạo / Kho",
             1000048: "Công tước Rồng / Trại lính",
             1000043: "Tiêu phu / Pháo",
-            
-            // Lab (Units & Spells)
-            4000082: "Nghiên cứu chung / Lab",
-            
-            // Linh thú (Pets - ID 73000000 đến 73000017...)
+
+            // Lab / Nghiên cứu
+            4000082: "Nghiên cứu chung (Lab)",
+            4000037: "Lính Làng Biển (Builder Base)",
+
+            // Linh thú (Pets)
             73000000: "L.A.S.S.I",
-            73000001: "Cú Điện (Electro Owl)",
-            73000002: "Bò Tây Tạng Dũng Mãnh (Mighty Yak)",
-            73000003: "Ngựa Một Sừng (Unicorn)",
+            73000001: "Cú Điện",
+            73000002: "Bò Tây Tạng Dũng Mãnh",
+            73000003: "Ngựa Một Sừng",
             73000004: "Diggy",
             73000007: "Poison Lizard",
             73000008: "Angry Jelly",
@@ -123,13 +121,11 @@
             }
             try {
                 cocData = JSON.parse(rawText);
-                
                 const storageObj = {
                     saveTime: Math.floor(Date.now() / 1000),
                     rawJson: rawText
                 };
                 localStorage.setItem('coc_saved_data', JSON.stringify(storageObj));
-                
                 renderTrackers();
             } catch (e) {
                 alert('Lỗi định dạng JSON! Hãy kiểm tra lại đoạn mã.');
@@ -137,75 +133,127 @@
             }
         }
 
-        function extractItemsWithTimer(list, defaultName) {
-            let items = [];
-            if (list) {
-                list.forEach(item => {
-                    if (item.timer && item.timer > 0) {
-                        let name = nameMapping[item.data] || `${defaultName} (ID: ${item.data})`;
-                        items.push({ 
-                            name: name, 
-                            level: item.lvl, 
-                            timer: item.timer 
-                        });
-                    }
-                });
-            }
-            return items;
-        }
-
-        function renderList(elementId, items, headerTitle) {
-            const ul = document.getElementById(elementId);
-            ul.innerHTML = '';
-            
-            if (items.length === 0) {
-                ul.innerHTML = '<li class="text-muted">Không có mục nào đang nâng cấp.</li>';
-                return;
-            }
-
-            // Sắp xếp thời gian ngắn nhất lên trên đầu (tăng dần)
-            items.sort((a, b) => a.timer - b.timer);
-
-            // Cập nhật tiêu đề số lượng thợ xây đang bận nếu là cột thợ xây
-            if (elementId === 'builders-list') {
-                const headerEl = ul.previousElementSibling;
-                if (headerEl) headerEl.innerText = `👷 Thợ Xây Đang Làm (${items.length}/6)`;
-            }
-
-            items.forEach(item => {
-                ul.innerHTML += `<li class="mb-3 border-bottom pb-2">
-                    <strong>${item.name}</strong><br>
-                    ⬆️ Cấp: ${item.level}<br>
-                    ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
-                    <span class="end-time">${getEndTimeString(item.timer)}</span>
-                </li>`;
-            });
-        }
-
         function renderTrackers() {
             if (!cocData) return;
             document.getElementById('player-tag').innerText = cocData.tag || "Không rõ";
 
-            // Quét tất cả các nguồn có thể chứa timer của thợ xây (Buildings, Heroes, Guardians, Buildings2)
-            let builderItems = [
-                ...extractItemsWithTimer(cocData.guardians, 'Hộ vệ / Công trình'),
-                ...extractItemsWithTimer(cocData.heroes, 'Tướng'),
-                ...extractItemsWithTimer(cocData.buildings, 'Công trình'),
-                ...extractItemsWithTimer(cocData.buildings2, 'Công trình Builder Base')
-            ];
-            renderList('builders-list', builderItems);
+            // 1. THỢ XÂY: Quét Guardians, Heroes, Buildings (có gear_up hoặc timer), và Buildings2
+            let builderItems = [];
 
-            // Phòng thí nghiệm (Units, Spells, Units2)
-            let labItems = [
-                ...extractItemsWithTimer(cocData.units, 'Nghiên cứu Lính'),
-                ...extractItemsWithTimer(cocData.spells, 'Nghiên cứu Phép'),
-                ...extractItemsWithTimer(cocData.units2, 'Nghiên cứu BH')
-            ];
-            renderList('lab-list', labItems);
+            if (cocData.guardians) {
+                cocData.guardians.forEach(g => {
+                    if (g.timer && g.timer > 0) {
+                        builderItems.push({ name: nameMapping[g.data] || `Hộ vệ (ID: ${g.data})`, level: g.lvl, timer: g.timer });
+                    }
+                });
+            }
 
-            // Linh thú (Pets)
-            let petItems = extractItemsWithTimer(cocData.pets, 'Linh thú');
-            renderList('pets-list', petItems);
+            if (cocData.heroes) {
+                cocData.heroes.forEach(h => {
+                    if (h.timer && h.timer > 0) {
+                        builderItems.push({ name: nameMapping[h.data] || `Tướng (ID: ${h.data})`, level: h.lvl, timer: g_name = h.timer });
+                        // sửa gọn lại đối tượng push:
+                        builderItems[builderItems.length - 1].timer = h.timer;
+                    }
+                });
+            }
+
+            if (cocData.buildings) {
+                cocData.buildings.forEach(b => {
+                    if (b.timer && b.timer > 0) {
+                        builderItems.push({ name: nameMapping[b.data] || `Công trình (ID: ${b.data})`, level: b.lvl, timer: b.timer });
+                    }
+                });
+            }
+
+            if (cocData.buildings2) {
+                cocData.buildings2.forEach(b2 => {
+                    if (b2.timer && b2.timer > 0) {
+                        builderItems.push({ name: nameMapping[b2.data] || `Công trình BH (ID: ${b2.data})`, level: b2.lvl, timer: b2.timer });
+                    }
+                });
+            }
+
+            // Sắp xếp thời gian ngắn nhất lên trên đầu
+            builderItems.sort((a, b) => a.timer - b.timer);
+
+            const buildersUl = document.getElementById('builders-list');
+            buildersUl.innerHTML = '';
+            document.getElementById('builders-title').innerText = `👷 Thợ Xây Đang Làm (${builderItems.length}/6)`;
+
+            if (builderItems.length === 0) {
+                buildersUl.innerHTML = '<li class="text-muted">Không có thợ nào đang bận.</li>';
+            } else {
+                builderItems.forEach(item => {
+                    buildersUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
+                        <strong>${item.name}</strong><br>
+                        ⬆️ Cấp: ${item.level}<br>
+                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
+                        <span class="end-time">${getEndTimeString(item.timer)}</span>
+                    </li>`;
+                });
+            }
+
+            // 2. PHÒNG THÍ NGHIỆM: Quét units (có cờ helper_recurrent) hoặc units2 có timer
+            let labItems = [];
+            if (cocData.units) {
+                cocData.units.forEach(u => {
+                    if (u.timer && u.timer > 0 && u.helper_recurrent) {
+                        labItems.push({ name: nameMapping[u.data] || `Nghiên cứu Lính (ID: ${u.data})`, level: u.lvl, timer: u.timer });
+                    }
+                });
+            }
+            if (cocData.units2) {
+                cocData.units2.forEach(u2 => {
+                    if (u2.timer && u2.timer > 0) {
+                        labItems.push({ name: nameMapping[u2.data] || `Nghiên cứu Lính BH (ID: ${u2.data})`, level: u2.lvl, timer: u2.timer });
+                    }
+                });
+            }
+
+            labItems.sort((a, b) => a.timer - b.timer);
+            const labUl = document.getElementById('lab-list');
+            labUl.innerHTML = '';
+
+            if (labItems.length === 0) {
+                labUl.innerHTML = '<li class="text-muted">Phòng thí nghiệm đang trống.</li>';
+            } else {
+                labItems.forEach(item => {
+                    labUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
+                        <strong>${item.name}</strong><br>
+                        ⬆️ Cấp: ${item.level}<br>
+                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
+                        <span class="end-time">${getEndTimeString(item.timer)}</span>
+                    </li>`;
+                });
+            }
+
+            // 3. LINH THÚ: Quét pets có timer
+            let petItems = [];
+            if (cocData.pets) {
+                cocData.pets.forEach(p => {
+                    if (p.timer && p.timer > 0) {
+                        petItems.push({ name: nameMapping[p.data] || `Linh thú (ID: ${p.data})`, level: p.lvl, timer: p.timer });
+                    }
+                });
+            }
+
+            petItems.sort((a, b) => a.timer - b.timer);
+            const petsUl = document.getElementById('pets-list');
+            petsUl.innerHTML = '';
+
+            if (petItems.length === 0) {
+                petsUl.innerHTML = '<li class="text-muted">Không có linh thú nào đang nâng cấp.</li>';
+            } else {
+                petItems.forEach(item => {
+                    petsUl.innerHTML += `<li class="mb-3 border-bottom pb-2">
+                        <strong>${item.name}</strong><br>
+                        ⬆️ Cấp: ${item.level}<br>
+                        ⏱️ Còn lại: <span class="timer" data-time="${item.timer}">${formatTime(item.timer)}</span><br>
+                        <span class="end-time">${getEndTimeString(item.timer)}</span>
+                    </li>`;
+                });
+            }
         }
 
         window.onload = function() {
@@ -216,10 +264,10 @@
                     document.getElementById('json-input').value = savedObj.rawJson;
                     cocData = JSON.parse(savedObj.rawJson);
 
-                    // Trừ bớt thời gian đã trôi qua từ lúc tắt/F5 trang để đồng hồ chạy chuẩn xác không bị reset
+                    // Tự động trừ bù khoảng thời gian đã trôi qua khi F5 lại trang
                     const elapsedSeconds = Math.floor(Date.now() / 1000) - savedObj.saveTime;
                     
-                    ['guardians', 'heroes', 'buildings', 'buildings2', 'units', 'spells', 'units2', 'pets'].forEach(key => {
+                    ['guardians', 'heroes', 'buildings', 'buildings2', 'units', 'units2', 'pets'].forEach(key => {
                         if (cocData[key]) {
                             cocData[key].forEach(item => {
                                 if (item.timer && item.timer > 0) {
@@ -236,7 +284,7 @@
             }
         };
 
-        // Đếm lùi thời gian thực mỗi giây
+        // Đồng hồ đếm lùi thời gian thực mỗi giây
         setInterval(() => {
             document.querySelectorAll('.timer').forEach(el => {
                 let timeLeft = parseInt(el.getAttribute('data-time'));
